@@ -1,0 +1,19 @@
+title: Cuerates
+role: Personal Project
+summary: >-
+  A social platform for discovering, tracking, and sharing movies and shows with
+  friends
+description: >-
+  Cuerates combines movie discovery with social features, allowing users to
+  search for content, manage watchlists and watched history, recommend titles to
+  friends, and connect through profiles and chat.
+stack:
+  - React
+  - Node.js
+  - MongoDB
+  - Express.js
+coverImage: /images/projects/cuerates/coverImage.png
+link: https://cuerates.vercel.app
+repo: https://github.com/RagedAbhi/Cuerates
+featured: false
+order: 1
