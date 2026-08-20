@@ -1,0 +1,17 @@
+title: Coffee House
+role: Personal Project
+summary: >-
+  A 3D coffee shop scene, modeled in Blender and brought into the browser as an
+  interactive experience.
+description: >-
+  Modeled and textured a small coffee shop in Blender, then brought it into a
+  WebGL scene where it can be viewed and interacted with directly in the browser
+  — a first real dive into 3D-for-web.
+stack:
+  - Blender
+  - Three.js
+  - React
+link: https://coffee-house-self.vercel.app/
+repo: https://github.com/RagedAbhi/CoffeeHouse.git
+featured: true
+order: 1

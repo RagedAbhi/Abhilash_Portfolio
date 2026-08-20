@@ -1,0 +1,11 @@
+category: Languages
+items:
+  - name: JavaScript
+    level: proficient
+  - name: Java
+    level: familiar
+  - name: Python
+    level: familiar
+  - name: C++
+    level: familiar
+order: 0

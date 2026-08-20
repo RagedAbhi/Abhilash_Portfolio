@@ -1,0 +1,16 @@
+title: Zentry Clone
+role: Personal Project
+summary: >-
+  A recreation of Zentry's award-winning site, built to study its animation
+  system and interaction design.
+description: >-
+  Rebuilt Zentry's homepage from scratch to understand how its scroll-driven
+  animations, layered reveals, and motion timing actually work under the hood —
+  not just what it looks like, but how it's built.
+stack:
+  - React
+  - GSAP
+link: https://game-site-rose.vercel.app/
+repo: https://github.com/RagedAbhi/Game-Site
+featured: true
+order: 0

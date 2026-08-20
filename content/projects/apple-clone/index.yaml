@@ -1,0 +1,17 @@
+title: Apple Clone
+role: Personal Project
+summary: >-
+  A recreation of Apple's product page, focused on matching its frontend
+  animation and 3D product presentation.
+description: >-
+  Rebuilt Apple's iPhone product page with matching scroll animations and a
+  Three.js-driven 3D product view — an exercise in matching the polish of one of
+  the most scrutinized frontends on the web.
+stack:
+  - React
+  - Three.js
+  - GSAP
+link: https://apple-clone-beta-eight.vercel.app/
+repo: https://github.com/RagedAbhi/Apple_Clone
+featured: true
+order: 2

@@ -1,0 +1,9 @@
+category: Backend & Data
+items:
+  - name: Node.js
+    level: proficient
+  - name: MongoDB
+    level: familiar
+  - name: Git
+    level: proficient
+order: 2
