@@ -15,10 +15,9 @@ import {
 
 interface HeroProps {
   site: SiteMeta;
-  latestProjectTitle: string;
 }
 
-export function Hero({ site, latestProjectTitle }: HeroProps) {
+export function Hero({ site }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const backgroundRef = useRef<HTMLDivElement>(null);
   const glowWrapperRef = useRef<HTMLDivElement>(null);
@@ -124,13 +123,23 @@ export function Hero({ site, latestProjectTitle }: HeroProps) {
               <SocialLinks socials={site.socials} />
             </div>
             <div className="flex flex-col items-end gap-3">
-              <a
-                href="#proof"
-                data-cursor="link"
-                className="font-mono text-xs uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
-              >
-                Currently building <span className="text-accent">{latestProjectTitle}</span>
-              </a>
+              <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-fg-muted">
+                <a
+                  href="#projects"
+                  data-cursor="link"
+                  className="transition-colors hover:text-accent"
+                >
+                  See the work ↓
+                </a>
+                <span className="text-fg-muted/30">/</span>
+                <a
+                  href="#contact"
+                  data-cursor="link"
+                  className="transition-colors hover:text-accent"
+                >
+                  Say hello ↓
+                </a>
+              </div>
               <a
                 href="#formation"
                 data-cursor="link"

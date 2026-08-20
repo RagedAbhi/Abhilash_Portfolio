@@ -1,0 +1,11 @@
+category: Creative and 3D
+items:
+  - name: Three.js
+    level: proficient
+  - name: GSAP
+    level: proficient
+  - name: Blender
+    level: familiar
+  - name: Figma
+    level: familiar
+order: 3

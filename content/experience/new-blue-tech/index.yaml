@@ -2,6 +2,12 @@ company: New Blue Tech
 role: Web Developer Intern
 startDate: '2023'
 endDate: '2023'
-summary: Web development internship at New Blue Tech.
-highlights: []
-order: 1
+summary: >-
+  Worked on web development tasks across frontend implementation and application
+  development, gaining early experience working within a professional
+  development environment.
+highlights:
+  - >-
+    The internship helped bridge the gap between academic development and
+    building software against real requirements and constraints.
+order: 2

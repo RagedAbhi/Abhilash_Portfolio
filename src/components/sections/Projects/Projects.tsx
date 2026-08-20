@@ -54,6 +54,7 @@ export function Projects({ projects }: { projects: Project[] }) {
   return (
     <div
       ref={sectionRef}
+      id="projects"
       className={cn("relative", !reducedMotion && "md:h-screen md:overflow-hidden")}
     >
       <div
@@ -73,8 +74,10 @@ export function Projects({ projects }: { projects: Project[] }) {
               panelRefs.current[index] = el;
             }}
             className={cn(
-              "relative flex h-[70vh] flex-col justify-end overflow-hidden rounded-2xl",
-              !reducedMotion && "md:h-full md:w-screen md:flex-shrink-0 md:rounded-none",
+              "relative flex flex-col overflow-hidden rounded-2xl",
+              project.coverImage.src ? "gap-6 pb-10 sm:pb-14" : "h-[70vh] justify-end",
+              !reducedMotion &&
+                "md:h-full md:w-screen md:flex-shrink-0 md:justify-end md:gap-0 md:rounded-none md:pb-0",
             )}
           >
             <div
@@ -88,16 +91,30 @@ export function Projects({ projects }: { projects: Project[] }) {
               <span className="absolute -right-4 bottom-0 select-none font-display text-[40vw] font-medium leading-none text-white/[0.04] md:text-[22vw]">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              {project.coverImage.src && (
+            </div>
+            {project.coverImage.src && (
+              // Normal flex-flow sibling (pushes the meta block below it, avoiding
+              // overlap) whenever panels stack vertically — mobile, or desktop under
+              // reduced motion where the horizontal pin is skipped (matching the
+              // track's own !reducedMotion guard). Only pulled into absolute
+              // positioning for the actual pinned horizontal-gallery layout, so meta
+              // can independently anchor to the panel's bottom edge.
+              <div
+                data-reveal-cover
+                className={cn(
+                  "relative z-10 mx-auto mt-16 h-[20vh] w-[min(56%,480px)] -rotate-3 overflow-hidden rounded-xl border border-white/10 shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] sm:mt-20 sm:h-[26vh]",
+                  !reducedMotion && "md:absolute md:left-1/2 md:top-28 md:mt-0 md:h-[30vh] md:-translate-x-1/2",
+                )}
+              >
                 <Image
                   src={project.coverImage.src}
                   alt={project.coverImage.alt}
                   fill
-                  sizes="100vw"
+                  sizes="(min-width: 768px) 60vw, 90vw"
                   className="object-cover"
                 />
-              )}
-            </div>
+              </div>
+            )}
             <div
               data-reveal-meta
               className="relative z-10 flex flex-col gap-3 bg-gradient-to-t from-bg via-bg/70 to-transparent p-6 pt-24 sm:p-10 sm:pt-32"

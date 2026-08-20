@@ -23,7 +23,7 @@ export default async function Home() {
 
   return (
     <main>
-      <Hero site={site} latestProjectTitle={projects[0]?.title ?? ""} />
+      <Hero site={site} />
       <section id="formation" className="border-t border-white/5">
         <About beats={beats} portrait={site.portrait} />
         <Skills groups={skillGroups} />

@@ -12,17 +12,17 @@ function formatRange(start: string, end: string) {
 
 export function Experience({ entries: experience }: { entries: ExperienceEntry[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const pathRef = useRef<SVGPathElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const reducedMotion = useReducedMotion();
 
   useGSAP(
     () => {
-      if (!sectionRef.current || !pathRef.current) return;
+      if (!sectionRef.current || !lineRef.current) return;
       const cards = cardRefs.current.filter((el): el is HTMLDivElement => Boolean(el));
       if (!cards.length) return;
       buildExperienceScrub(
-        { section: sectionRef.current, path: pathRef.current, cards },
+        { section: sectionRef.current, line: lineRef.current, cards },
         reducedMotion,
       );
     },
@@ -35,21 +35,11 @@ export function Experience({ entries: experience }: { entries: ExperienceEntry[]
         03 — Proof
       </span>
       <div className="relative mx-auto max-w-4xl">
-        <svg
+        <div
+          ref={lineRef}
           aria-hidden
-          className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 overflow-visible sm:block"
-          viewBox="0 0 2 1000"
-          preserveAspectRatio="none"
-        >
-          <path
-            ref={pathRef}
-            d="M1,0 L1,1000"
-            stroke="var(--accent)"
-            strokeWidth="2"
-            fill="none"
-            vectorEffect="non-scaling-stroke"
-          />
-        </svg>
+          className="absolute inset-y-0 left-1/2 hidden w-0.5 origin-top -translate-x-1/2 bg-accent sm:block"
+        />
         <div className="flex flex-col gap-20">
           {experience.map((entry, index) => (
             <div

@@ -1,9 +1,11 @@
-category: Backend & Data
+category: Backend
 items:
   - name: Node.js
     level: proficient
+  - name: Express
+    level: proficient
   - name: MongoDB
     level: familiar
-  - name: Git
+  - name: SQL
     level: proficient
 order: 2

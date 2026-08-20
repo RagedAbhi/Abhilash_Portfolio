@@ -10,6 +10,7 @@ description: >-
 stack:
   - React
   - GSAP
+coverImage: /images/projects/zentry-clone/coverImage.png
 link: https://game-site-rose.vercel.app/
 repo: https://github.com/RagedAbhi/Game-Site
 featured: true

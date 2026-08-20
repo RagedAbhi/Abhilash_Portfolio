@@ -1,11 +1,11 @@
-category: Frontend & Design
+category: Frontend
 items:
   - name: React
     level: proficient
-  - name: HTML
+  - name: Javascript
     level: proficient
-  - name: CSS
+  - name: Tailwind
     level: proficient
-  - name: Figma
-    level: proficient
+  - name: Redux
+    level: familiar
 order: 1

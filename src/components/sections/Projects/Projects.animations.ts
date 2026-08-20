@@ -9,9 +9,9 @@ interface ProjectsRefs {
 
 export function buildProjectsScrub({ section, track, panels }: ProjectsRefs, reducedMotion: boolean) {
   panels.forEach((panel) => {
-    const cover = panel.querySelector<HTMLElement>("[data-reveal-cover]");
+    const covers = Array.from(panel.querySelectorAll<HTMLElement>("[data-reveal-cover]"));
     const meta = panel.querySelector<HTMLElement>("[data-reveal-meta]");
-    if (cover) gsap.set(cover, { clipPath: "inset(0% 0% 0% 0%)" });
+    if (covers.length) gsap.set(covers, { clipPath: "inset(0% 0% 0% 0%)" });
     if (meta) gsap.set(meta, { autoAlpha: 1, y: 0 });
   });
 
@@ -21,9 +21,9 @@ export function buildProjectsScrub({ section, track, panels }: ProjectsRefs, red
 
   mm.add("(min-width: 768px)", () => {
     panels.forEach((panel) => {
-      const cover = panel.querySelector<HTMLElement>("[data-reveal-cover]");
+      const covers = Array.from(panel.querySelectorAll<HTMLElement>("[data-reveal-cover]"));
       const meta = panel.querySelector<HTMLElement>("[data-reveal-meta]");
-      if (cover) gsap.set(cover, { clipPath: "inset(0% 0% 0% 100%)" });
+      if (covers.length) gsap.set(covers, { clipPath: "inset(0% 0% 0% 100%)" });
       if (meta) gsap.set(meta, { autoAlpha: 0, y: 24 });
     });
 
@@ -45,7 +45,7 @@ export function buildProjectsScrub({ section, track, panels }: ProjectsRefs, red
     });
 
     panels.forEach((panel) => {
-      const cover = panel.querySelector<HTMLElement>("[data-reveal-cover]");
+      const covers = Array.from(panel.querySelectorAll<HTMLElement>("[data-reveal-cover]"));
       const meta = panel.querySelector<HTMLElement>("[data-reveal-meta]");
 
       const tl = gsap.timeline({
@@ -55,10 +55,10 @@ export function buildProjectsScrub({ section, track, panels }: ProjectsRefs, red
           start: "left 85%",
           end: "left 40%",
           scrub: true,
-          ...(cover ? toggleWillChange(cover, "clip-path") : {}),
+          ...(covers.length ? toggleWillChange(covers, "clip-path") : {}),
         },
       });
-      if (cover) tl.to(cover, { clipPath: "inset(0% 0% 0% 0%)", ease: "none" }, 0);
+      if (covers.length) tl.to(covers, { clipPath: "inset(0% 0% 0% 0%)", ease: "none" }, 0);
       if (meta) tl.to(meta, { autoAlpha: 1, y: 0, ease: "none" }, 0);
     });
   });

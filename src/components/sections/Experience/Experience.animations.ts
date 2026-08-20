@@ -2,22 +2,21 @@ import { gsap } from "@/lib/gsap";
 
 interface ExperienceRefs {
   section: HTMLElement;
-  path: SVGPathElement;
+  line: HTMLElement;
   cards: HTMLElement[];
 }
 
-export function buildExperienceScrub({ section, path, cards }: ExperienceRefs, reducedMotion: boolean) {
+export function buildExperienceScrub({ section, line, cards }: ExperienceRefs, reducedMotion: boolean) {
   if (reducedMotion) {
-    gsap.set(path, { strokeDashoffset: 0 });
+    gsap.set(line, { scaleY: 1 });
     gsap.set(cards, { autoAlpha: 1, x: 0 });
     return;
   }
 
-  const length = path.getTotalLength();
-  gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+  gsap.set(line, { scaleY: 0 });
 
-  gsap.to(path, {
-    strokeDashoffset: 0,
+  gsap.to(line, {
+    scaleY: 1,
     ease: "none",
     scrollTrigger: {
       trigger: section,

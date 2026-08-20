@@ -28,6 +28,7 @@ export function Contact({ site }: { site: SiteMeta }) {
   return (
     <div
       ref={sectionRef}
+      id="contact"
       className="relative flex min-h-screen flex-col justify-center gap-12 px-6 py-32 sm:px-10"
     >
       <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
