@@ -111,7 +111,7 @@ export function buildHeroAmbientBackground(
   };
 }
 
-export function buildHeroExitScrub({ section, background, headline }: HeroRefs, reducedMotion: boolean) {
+export function buildHeroExitScrub({ section, background, headline, subtext }: HeroRefs, reducedMotion: boolean) {
   if (reducedMotion) return;
 
   ScrollTrigger.create({
@@ -124,7 +124,8 @@ export function buildHeroExitScrub({ section, background, headline }: HeroRefs, 
     animation: gsap
       .timeline()
       .to(headline, { yPercent: -40, scale: 0.9, autoAlpha: 0, ease: "none" }, 0)
+      .fromTo(subtext, { autoAlpha: 1, yPercent: 0 }, { yPercent: -20, autoAlpha: 0, ease: "none" }, 0)
       .to(background, { yPercent: -20, ease: "none" }, 0),
-    ...toggleWillChange([headline, background], "transform, opacity"),
+    ...toggleWillChange([headline, subtext, background], "transform, opacity"),
   });
 }
