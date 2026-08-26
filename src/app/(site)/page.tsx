@@ -24,15 +24,15 @@ export default async function Home() {
   return (
     <main>
       <Hero site={site} />
-      <section id="formation" className="border-t border-white/5">
+      <section id="formation" className="border-t border-fg/5">
         <About beats={beats} portrait={site.portrait} />
         <Skills groups={skillGroups} />
       </section>
-      <section id="proof" className="border-t border-white/5">
+      <section id="proof" className="border-t border-fg/5">
         <Experience entries={experience} />
         <Projects projects={projects} />
       </section>
-      <section id="invitation" className="border-t border-white/5">
+      <section id="invitation" className="border-t border-fg/5">
         <Contact site={site} />
       </section>
     </main>

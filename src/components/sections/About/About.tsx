@@ -33,12 +33,12 @@ export function About({ beats: aboutBeats, portrait }: AboutProps) {
 
   return (
     <div ref={sectionRef} className="relative flex h-screen items-center overflow-hidden px-6 sm:px-10">
-      <div className="relative mx-auto flex w-full max-w-6xl items-center gap-12">
-        <div className="relative min-w-0 flex-1">
+      <div className="relative mx-auto w-full max-w-6xl">
+        <div className="relative z-10 flex min-h-[260px] max-w-2xl flex-col justify-center sm:min-h-[200px]">
           <span className="mb-8 block font-mono text-xs uppercase tracking-widest text-fg-muted">
             02 — Formation
           </span>
-          <div className="relative min-h-[260px] max-w-2xl sm:min-h-[200px]">
+          <div className="relative">
             {aboutBeats.map((beat, index) => (
               <p
                 key={beat}
@@ -52,24 +52,50 @@ export function About({ beats: aboutBeats, portrait }: AboutProps) {
             ))}
           </div>
         </div>
+      </div>
 
-        <div
-          ref={parallaxRef}
-          aria-hidden
-          className="pointer-events-none relative hidden h-[82vh] flex-shrink-0 sm:block"
-          style={{ width: "26vw" }}
-        >
-          <div className="absolute inset-0 scale-125 rounded-full bg-accent/20 blur-[100px]" />
-          {portrait.src && (
+      {/* Positioned relative to the full-width section (not the max-w-6xl text
+          column) and anchored past the section's own right edge, so it bleeds off
+          the right side of the screen instead of staying boxed inside the content
+          column — clipped by the section's own overflow-hidden. */}
+      <div
+        ref={parallaxRef}
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 hidden h-[94vh] sm:block"
+        style={{ width: "48vw", right: "-6vw" }}
+      >
+        <div className="absolute inset-0 scale-125 rounded-full bg-accent/20 blur-[100px]" />
+        {portrait.src && (
+          <>
             <Image
               src={portrait.src}
               alt={portrait.alt}
               fill
-              sizes="26vw"
-              className="object-contain object-bottom"
+              sizes="48vw"
+              className="object-contain object-bottom grayscale"
             />
-          )}
-        </div>
+            {/* Duotone tint: a solid accent-colored layer, masked to the portrait's
+                own alpha shape so only the visible photo (not the transparent PNG
+                padding) is colorized, blended over the grayscale image above via
+                mix-blend-color. Uses the live --accent variable directly (not a
+                static filter) so it stays in sync with the site's existing
+                per-chapter/per-theme accent system instead of a hardcoded hue.
+                Opacity kept low so the tint reads as a faded wash, not a flat color. */}
+            <div
+              className="absolute inset-0 bg-accent opacity-40 mix-blend-color"
+              style={{
+                WebkitMaskImage: `url(${portrait.src})`,
+                maskImage: `url(${portrait.src})`,
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskPosition: "bottom",
+                maskPosition: "bottom",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );

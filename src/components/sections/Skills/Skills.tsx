@@ -51,7 +51,7 @@ export function Skills({ groups: skills }: { groups: SkillGroup[] }) {
               {group.items.map((item) => (
                 <li
                   key={item.name}
-                  className="flex items-baseline justify-between gap-4 border-b border-white/5 pb-3 font-display text-2xl text-fg sm:text-3xl"
+                  className="flex items-baseline justify-between gap-4 border-b border-fg/5 pb-3 font-display text-2xl text-fg sm:text-3xl"
                 >
                   <span>{item.name}</span>
                   {item.level && (

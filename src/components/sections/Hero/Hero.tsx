@@ -90,7 +90,7 @@ export function Hero({ site }: HeroProps) {
       <div
         ref={backgroundRef}
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#1c1e22,_var(--bg)_65%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--bg-elevated),_var(--bg)_65%)]"
       >
         <div
           ref={glowWrapperRef}

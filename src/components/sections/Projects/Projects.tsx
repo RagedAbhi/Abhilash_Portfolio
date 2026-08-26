@@ -85,10 +85,10 @@ export function Projects({ projects }: { projects: Project[] }) {
               aria-hidden
               className="absolute inset-0"
               style={{
-                background: `radial-gradient(120% 120% at 15% 10%, var(${coverAccents[index % coverAccents.length]}) 0%, transparent 45%), linear-gradient(160deg, #17181b 0%, #0e0f11 70%)`,
+                background: `radial-gradient(120% 120% at 15% 10%, var(${coverAccents[index % coverAccents.length]}) 0%, transparent 45%), linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg) 70%)`,
               }}
             >
-              <span className="absolute -right-4 bottom-0 select-none font-display text-[40vw] font-medium leading-none text-white/[0.04] md:text-[22vw]">
+              <span className="absolute -right-4 bottom-0 select-none font-display text-[40vw] font-medium leading-none text-fg/[0.04] md:text-[22vw]">
                 {String(index + 1).padStart(2, "0")}
               </span>
             </div>
@@ -102,7 +102,7 @@ export function Projects({ projects }: { projects: Project[] }) {
               <div
                 data-reveal-cover
                 className={cn(
-                  "relative z-10 mx-auto mt-16 h-[20vh] w-[min(56%,480px)] -rotate-3 overflow-hidden rounded-xl border border-white/10 shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] sm:mt-20 sm:h-[26vh]",
+                  "relative z-10 mx-auto mt-16 h-[20vh] w-[min(56%,480px)] -rotate-3 overflow-hidden rounded-xl border border-fg/10 shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] sm:mt-20 sm:h-[26vh]",
                   !reducedMotion && "md:absolute md:left-1/2 md:top-28 md:mt-0 md:h-[30vh] md:-translate-x-1/2",
                 )}
               >
@@ -130,7 +130,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                 {project.stack.map((tech) => (
                   <span
                     key={tech}
-                    className="rounded-full border border-white/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-fg-muted"
+                    className="rounded-full border border-fg/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-fg-muted"
                   >
                     {tech}
                   </span>

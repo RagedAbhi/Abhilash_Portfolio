@@ -6,6 +6,7 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useLenis } from "@/hooks/useLenis";
 import { useSiteStore } from "@/lib/store";
 import { chapters } from "@/lib/chapters";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export function Nav({ name }: { name: string }) {
   const navRef = useRef<HTMLElement>(null);
@@ -55,21 +56,24 @@ export function Nav({ name }: { name: string }) {
         >
           {name}
         </a>
-        <nav className="hidden gap-8 sm:flex">
-          {chapters.map((chapter, index) => (
-            <a
-              key={chapter.id}
-              href={`#${chapter.id}`}
-              data-cursor="link"
-              onClick={scrollToSection(chapter.id)}
-              className={`font-mono text-xs uppercase tracking-widest transition-colors ${
-                activeSection === chapter.id ? "text-accent" : "text-fg-muted hover:text-fg"
-              }`}
-            >
-              {String(index + 1).padStart(2, "0")} {chapter.label}
-            </a>
-          ))}
-        </nav>
+        <div className="hidden items-center gap-8 sm:flex">
+          <nav className="flex gap-8">
+            {chapters.map((chapter, index) => (
+              <a
+                key={chapter.id}
+                href={`#${chapter.id}`}
+                data-cursor="link"
+                onClick={scrollToSection(chapter.id)}
+                className={`font-mono text-xs uppercase tracking-widest transition-colors ${
+                  activeSection === chapter.id ? "text-accent" : "text-fg-muted hover:text-fg"
+                }`}
+              >
+                {String(index + 1).padStart(2, "0")} {chapter.label}
+              </a>
+            ))}
+          </nav>
+          <ThemeToggle />
+        </div>
 
         <button
           type="button"
@@ -116,6 +120,10 @@ export function Nav({ name }: { name: string }) {
             {chapter.label}
           </a>
         ))}
+        <div className="mt-4 flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-fg-muted">
+          <ThemeToggle />
+          <span>Theme</span>
+        </div>
       </div>
     </>
   );

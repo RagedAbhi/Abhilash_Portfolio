@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { NoiseOverlay } from "@/components/layout/NoiseOverlay";
@@ -39,8 +40,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
+      <head>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          // Runs before hydration so a returning visitor's saved light-mode
+          // preference applies immediately, instead of flashing dark (the
+          // default/SSR render) first. Paired with suppressHydrationWarning on
+          // <html> above, since this attribute is applied outside React's own
+          // render output and would otherwise be flagged as a mismatch.
+        >
+          {"try{if(localStorage.getItem('theme')==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}"}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col bg-bg text-fg">
         <SmoothScrollProvider>
           <LoadingScreen />

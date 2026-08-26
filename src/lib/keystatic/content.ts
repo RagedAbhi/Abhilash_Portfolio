@@ -1,4 +1,23 @@
+import { statSync } from "node:fs";
+import path from "node:path";
 import { reader } from "./reader";
+
+// Keystatic overwrites the same file path on every re-upload (e.g. re-uploading
+// a new portrait still saves to /images/portrait.png), so the URL never changes
+// between edits — both next/image's optimizer cache and the browser's own HTTP
+// cache then keep serving the old bytes indefinitely. Appending the file's own
+// last-modified time as a query string gives each real change a distinct URL,
+// busting both caches automatically.
+function withCacheBust(publicPath: string): string {
+  if (!publicPath) return publicPath;
+  try {
+    const filePath = path.join(process.cwd(), "public", publicPath);
+    const { mtimeMs } = statSync(filePath);
+    return `${publicPath}?v=${Math.floor(mtimeMs)}`;
+  } catch {
+    return publicPath;
+  }
+}
 
 export interface MediaAsset {
   src: string;
@@ -66,7 +85,7 @@ export async function getSiteSettings(): Promise<SiteMeta> {
     subline: data.subline,
     email: data.email,
     socials: data.socials.map((s) => ({ label: s.label, href: s.href })),
-    portrait: { src: data.portrait ?? "", alt: data.portraitAlt ?? "" },
+    portrait: { src: withCacheBust(data.portrait ?? ""), alt: data.portraitAlt ?? "" },
     contactHeadline: data.contactHeadline,
     resumeUrl: data.resume || undefined,
   };
@@ -88,7 +107,7 @@ export async function getProjects(): Promise<Project[]> {
       summary: entry.summary,
       description: entry.description,
       stack: [...entry.stack],
-      coverImage: { src: entry.coverImage ?? "", alt: entry.coverImageAlt ?? "" },
+      coverImage: { src: withCacheBust(entry.coverImage ?? ""), alt: entry.coverImageAlt ?? "" },
       link: entry.link || undefined,
       repo: entry.repo || undefined,
       featured: entry.featured,

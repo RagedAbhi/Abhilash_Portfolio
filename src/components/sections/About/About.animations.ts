@@ -8,14 +8,43 @@ interface AboutRefs {
 }
 
 export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reducedMotion: boolean) {
+  // Defensive: don't rely solely on useGSAP's revertOnUpdate to have fully torn
+  // down a previous run's ScrollTrigger. useReducedMotion() always reports false
+  // on first render (required for hydration safety) then corrects to the real
+  // value shortly after — so every reduced-motion visitor briefly builds the
+  // non-reduced pinned setup before this re-runs. Killing a *pinned* trigger
+  // while it's actively engaged (mid-scroll) doesn't itself recalculate other
+  // triggers' positions, which can leave stale pin/transform offsets on the
+  // beats. Killing explicitly + refreshing after guards against this regardless
+  // of what revertOnUpdate already did.
+  ScrollTrigger.getAll()
+    .filter((st) => st.trigger === section)
+    .forEach((st) => st.kill());
+
   if (reducedMotion) {
     gsap.set(beats, { autoAlpha: 1, yPercent: 0, position: "relative" });
     gsap.set(parallax, { autoAlpha: 0.5 });
+    ScrollTrigger.refresh();
     return;
   }
 
   gsap.set(beats, { autoAlpha: 0, yPercent: 30 });
   gsap.set(parallax, { autoAlpha: 0 });
+
+  // Continuous parallax: a dedicated ScrollTrigger spanning the section's entire
+  // presence in the viewport (not tied to the discrete beat-transition timeline
+  // below, whose pacing depends on beat count) — drifts the portrait at a
+  // different rate than the page scroll for the classic layered-depth feel,
+  // the same technique Hero's own background already uses for its parallax.
+  gsap.fromTo(
+    parallax,
+    { yPercent: -8 },
+    {
+      yPercent: 16,
+      ease: "none",
+      scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 1 },
+    },
+  );
 
   // Entrance: reveal the first beat and portrait as this section's top edge
   // approaches the viewport, rather than having them already sitting there fully
@@ -56,7 +85,6 @@ export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reduced
     }
     tl.to(beat, { autoAlpha: 1, yPercent: 0, duration: 1, ease: ease.scrub }, index - 1);
   });
-  tl.to(parallax, { yPercent: 20, ease: "none" }, 0);
 
   ScrollTrigger.create({
     trigger: section,
@@ -67,4 +95,6 @@ export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reduced
     scrub: 1,
     animation: tl,
   });
+
+  ScrollTrigger.refresh();
 }

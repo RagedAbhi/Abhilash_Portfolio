@@ -43,7 +43,7 @@ export function Contact({ site }: { site: SiteMeta }) {
       <div ref={metaRef} className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
         <MagneticButton
           href={`mailto:${site.email}`}
-          className="rounded-full border border-white/15 px-8 py-4 font-mono text-sm uppercase tracking-widest text-fg transition-colors hover:border-accent hover:text-accent"
+          className="rounded-full border border-fg/15 px-8 py-4 font-mono text-sm uppercase tracking-widest text-fg transition-colors hover:border-accent hover:text-accent"
         >
           {site.email}
         </MagneticButton>

@@ -2,6 +2,7 @@
 
 :root {
   --bg: #0e0f11;
+  --bg-elevated: #1c1e22;
   --fg: #eaeaea;
   --fg-muted: #8f9096;
   --accent: #c6ff3d;
@@ -9,6 +10,18 @@
   --accent-formation: #5b8cff;
   --accent-proof: #ff6b4a;
   --accent-invitation: #f2ede4;
+}
+
+:root[data-theme="light"] {
+  --bg: #f7f5f0;
+  --bg-elevated: #efe9da;
+  --fg: #1a1917;
+  --fg-muted: #6f6d66;
+  --accent: #6a9c1f;
+  --accent-arrival: #6a9c1f;
+  --accent-formation: #2f5fd6;
+  --accent-proof: #d94f28;
+  --accent-invitation: #3a352c;
 }
 
 @theme inline {
