@@ -63,10 +63,18 @@ export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reduced
     .to(beats[0], { autoAlpha: 1, yPercent: 0, ease: "none" }, 0)
     .to(parallax, { autoAlpha: 1, ease: "none" }, 0);
 
+  // Sequential (non-overlapping) crossfade: because this timeline is scrubbed
+  // directly by scroll position, a visitor can pause at any point — including
+  // mid-transition. A simultaneous crossfade would leave both beats legible and
+  // overlapping at that exact point, so each transition is split into two
+  // non-overlapping halves: the outgoing beat fully exits before the incoming
+  // beat starts entering, guaranteeing at most one beat is ever visible.
   const tl = gsap.timeline();
+  const HALF = 0.5;
   beats.forEach((beat, index) => {
     if (index === 0) return;
     const prev = beats[index - 1];
+    const segmentStart = index - 1;
     if (index === 1) {
       // beats[0]'s "visible" state is set by the separate entrance timeline above,
       // not this one — a plain .to() here would capture its from-state at build
@@ -77,13 +85,13 @@ export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reduced
       tl.fromTo(
         prev,
         { autoAlpha: 1, yPercent: 0 },
-        { autoAlpha: 0, yPercent: -30, duration: 1, ease: ease.scrub },
-        index - 1,
+        { autoAlpha: 0, yPercent: -30, duration: HALF, ease: ease.scrub },
+        segmentStart,
       );
     } else {
-      tl.to(prev, { autoAlpha: 0, yPercent: -30, duration: 1, ease: ease.scrub }, index - 1);
+      tl.to(prev, { autoAlpha: 0, yPercent: -30, duration: HALF, ease: ease.scrub }, segmentStart);
     }
-    tl.to(beat, { autoAlpha: 1, yPercent: 0, duration: 1, ease: ease.scrub }, index - 1);
+    tl.to(beat, { autoAlpha: 1, yPercent: 0, duration: HALF, ease: ease.scrub }, segmentStart + HALF);
   });
 
   ScrollTrigger.create({
