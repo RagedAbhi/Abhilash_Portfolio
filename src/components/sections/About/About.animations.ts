@@ -52,6 +52,30 @@ export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reduced
   // Hero's pin releasing (in the section immediately before this one) is exactly
   // what brings this section's top edge up toward the viewport — so the two read
   // as one continuous crossfade handoff instead of "Hero fades, then this appears."
+  //
+  // beats[0] and parallax are split into two separate triggers (rather than one
+  // timeline animating both) so each can be killed independently. This trigger's
+  // range ends exactly where the pin's range begins ("top top"), handing off
+  // control of beats[0] to the pin's own tl below. Once scrolled past that point
+  // this trigger's progress clamps at 1, but it doesn't go away — a later
+  // ScrollTrigger.refresh() (window resize, or the one this function calls on
+  // every run) re-renders it at that clamped state, which re-asserts beats[0] at
+  // autoAlpha:1 and can stomp the pin's own fade-out of beats[0], leaving it stuck
+  // visible on top of later beats. Killing it once it's done its one-time job
+  // removes that second writer entirely — the pin's tl fully owns beats[0] from
+  // here on, including reverse-scrubbing back into it. Parallax's own fade-in
+  // (below) is a separate trigger precisely so killing this one doesn't take the
+  // portrait down with it — nothing else ever takes over parallax's opacity.
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top bottom",
+      end: "top top",
+      scrub: 1,
+      onLeave: (self) => self.kill(),
+    },
+  }).to(beats[0], { autoAlpha: 1, yPercent: 0, ease: "none" }, 0);
+
   gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -59,9 +83,7 @@ export function buildAboutScrub({ section, beats, parallax }: AboutRefs, reduced
       end: "top top",
       scrub: 1,
     },
-  })
-    .to(beats[0], { autoAlpha: 1, yPercent: 0, ease: "none" }, 0)
-    .to(parallax, { autoAlpha: 1, ease: "none" }, 0);
+  }).to(parallax, { autoAlpha: 1, ease: "none" }, 0);
 
   // Sequential (non-overlapping) crossfade: because this timeline is scrubbed
   // directly by scroll position, a visitor can pause at any point — including
