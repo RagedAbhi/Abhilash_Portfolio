@@ -10,9 +10,11 @@ interface MagneticButtonProps {
   href: string;
   children: ReactNode;
   className?: string;
+  target?: string;
+  rel?: string;
 }
 
-export function MagneticButton({ href, children, className }: MagneticButtonProps) {
+export function MagneticButton({ href, children, className, target, rel }: MagneticButtonProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const reducedMotion = useReducedMotion();
 
@@ -44,7 +46,14 @@ export function MagneticButton({ href, children, className }: MagneticButtonProp
   );
 
   return (
-    <a ref={ref} href={href} data-cursor="link" className={cn("inline-block", className)}>
+    <a
+      ref={ref}
+      href={href}
+      target={target}
+      rel={rel}
+      data-cursor="link"
+      className={cn("inline-block", className)}
+    >
       {children}
     </a>
   );

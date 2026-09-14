@@ -1,4 +1,5 @@
 import { Hero } from "@/components/sections/Hero/Hero";
+import { TimelineBridge } from "@/components/layout/TimelineBridge";
 import { About } from "@/components/sections/About/About";
 import { Skills } from "@/components/sections/Skills/Skills";
 import { Experience } from "@/components/sections/Experience/Experience";
@@ -24,12 +25,13 @@ export default async function Home() {
   return (
     <main>
       <Hero site={site} />
+      <TimelineBridge />
       <section id="formation" className="border-t border-fg/5">
-        <About beats={beats} portrait={site.portrait} />
-        <Skills groups={skillGroups} />
+        <About beats={beats} />
       </section>
       <section id="proof" className="border-t border-fg/5">
         <Experience entries={experience} />
+        <Skills groups={skillGroups} />
         <Projects projects={projects} />
       </section>
       <section id="invitation" className="border-t border-fg/5">

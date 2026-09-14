@@ -5,8 +5,9 @@ export interface Chapter {
 }
 
 export const chapters: Chapter[] = [
-  { id: "arrival", label: "Arrival", accentVar: "--accent-arrival" },
-  { id: "formation", label: "Formation", accentVar: "--accent-formation" },
-  { id: "proof", label: "Proof", accentVar: "--accent-proof" },
-  { id: "invitation", label: "Invitation", accentVar: "--accent-invitation" },
+  { id: "arrival", label: "Home", accentVar: "--accent-arrival" },
+  { id: "formation", label: "About", accentVar: "--accent-formation" },
+  { id: "proof", label: "Experience", accentVar: "--accent-proof" },
+  { id: "projects", label: "Projects", accentVar: "--accent-projects" },
+  { id: "invitation", label: "Contact", accentVar: "--accent-invitation" },
 ];

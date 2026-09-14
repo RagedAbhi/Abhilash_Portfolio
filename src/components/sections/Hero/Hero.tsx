@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSiteStore } from "@/lib/store";
 import type { SiteMeta } from "@/lib/keystatic/content";
 import { SocialLinks } from "@/components/ui/SocialLinks";
+import { ArrowDownIcon } from "@/components/ui/icons";
 import {
   setHeroInitialState,
   playHeroEntrance,
@@ -24,6 +26,8 @@ export function Hero({ site }: HeroProps) {
   const glowRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subtextRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const scrollCueRef = useRef<HTMLAnchorElement>(null);
   const reducedMotion = useReducedMotion();
   const loadingComplete = useSiteStore((state) => state.loadingComplete);
 
@@ -35,7 +39,9 @@ export function Hero({ site }: HeroProps) {
         !glowWrapperRef.current ||
         !glowRef.current ||
         !headlineRef.current ||
-        !subtextRef.current
+        !subtextRef.current ||
+        !portraitRef.current ||
+        !scrollCueRef.current
       ) {
         return;
       }
@@ -46,6 +52,8 @@ export function Hero({ site }: HeroProps) {
         glow: glowRef.current,
         headline: headlineRef.current,
         subtext: subtextRef.current,
+        portrait: portraitRef.current,
+        scrollCue: scrollCueRef.current,
       };
       setHeroInitialState(refs, reducedMotion);
       buildHeroExitScrub(refs, reducedMotion);
@@ -63,7 +71,9 @@ export function Hero({ site }: HeroProps) {
         !glowWrapperRef.current ||
         !glowRef.current ||
         !headlineRef.current ||
-        !subtextRef.current
+        !subtextRef.current ||
+        !portraitRef.current ||
+        !scrollCueRef.current
       ) {
         return;
       }
@@ -74,6 +84,8 @@ export function Hero({ site }: HeroProps) {
         glow: glowRef.current,
         headline: headlineRef.current,
         subtext: subtextRef.current,
+        portrait: portraitRef.current,
+        scrollCue: scrollCueRef.current,
       };
       const { revert } = playHeroEntrance(refs, reducedMotion);
       return revert;
@@ -85,7 +97,7 @@ export function Hero({ site }: HeroProps) {
     <section
       ref={sectionRef}
       id="arrival"
-      className="relative flex h-screen w-full items-end overflow-hidden bg-bg"
+      className="relative flex h-screen w-full items-center overflow-hidden bg-bg"
     >
       <div
         ref={backgroundRef}
@@ -104,52 +116,78 @@ export function Hero({ site }: HeroProps) {
           />
         </div>
       </div>
-      <div className="relative z-10 flex w-full flex-col gap-8 px-6 pb-16 sm:px-10 sm:pb-24">
+
+      <div className="relative z-10 flex w-full flex-col gap-6 px-6 sm:px-10">
         <h1
           ref={headlineRef}
-          className="max-w-5xl text-balance font-display text-[13vw] font-medium leading-[0.92] tracking-tight text-fg sm:text-[9vw]"
+          className="max-w-2xl text-balance font-display text-[13vw] font-medium leading-[0.92] tracking-tight text-fg sm:text-[7vw]"
         >
-          {site.tagline}
+          {site.name}
         </h1>
-        <div ref={subtextRef} className="flex flex-col gap-6">
-          <p className="max-w-lg font-sans text-base text-fg-muted sm:text-lg">
-            {site.subline}
+        <div ref={subtextRef} className="flex max-w-2xl flex-col gap-8">
+          <p className="font-mono text-sm uppercase tracking-widest text-fg-muted sm:text-base">
+            {site.role}
           </p>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div className="flex flex-col gap-4">
-              <p className="font-sans text-sm text-fg-muted sm:text-base">
-                {site.name} — {site.role}
-              </p>
-              <SocialLinks socials={site.socials} />
-            </div>
-            <div className="flex flex-col items-end gap-3">
-              <div className="flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-fg-muted">
-                <a
-                  href="#projects"
-                  data-cursor="link"
-                  className="transition-colors hover:text-accent"
-                >
-                  See the work ↓
-                </a>
-                <span className="text-fg-muted/30">/</span>
-                <a
-                  href="#contact"
-                  data-cursor="link"
-                  className="transition-colors hover:text-accent"
-                >
-                  Say hello ↓
-                </a>
-              </div>
-              <a
-                href="#formation"
-                data-cursor="link"
-                className="font-mono text-xs uppercase tracking-widest text-fg-muted transition-colors hover:text-accent"
-              >
-                Scroll to continue
-              </a>
-            </div>
-          </div>
+          <SocialLinks socials={site.socials} />
         </div>
+      </div>
+
+      <a
+        ref={scrollCueRef}
+        href="#formation"
+        data-cursor="link"
+        className="group absolute inset-x-0 bottom-8 z-10 flex flex-col items-center gap-2 sm:bottom-10"
+      >
+        <span
+          data-scroll-label
+          className="font-mono text-xs uppercase tracking-widest text-fg-muted transition-colors group-hover:text-accent"
+        >
+          Scroll to continue
+        </span>
+        <span data-scroll-arrow className="block">
+          <ArrowDownIcon className="h-4 w-4 text-fg-muted transition-colors group-hover:text-accent" />
+        </span>
+      </a>
+
+      {/* Positioned relative to the section and anchored past its own right edge,
+          so it bleeds off the right side of the screen instead of staying boxed
+          inside the content column — clipped by the section's own overflow-hidden. */}
+      <div
+        ref={portraitRef}
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 hidden h-[92vh] sm:block"
+        style={{ width: "48vw", right: "-6vw" }}
+      >
+        <div className="absolute inset-0 scale-125 rounded-full bg-accent/20 blur-[100px]" />
+        {site.portrait.src && (
+          <>
+            <Image
+              src={site.portrait.src}
+              alt={site.portrait.alt}
+              fill
+              sizes="48vw"
+              className="object-contain object-bottom grayscale"
+            />
+            {/* Duotone tint: a solid accent-colored layer, masked to the portrait's
+                own alpha shape so only the visible photo (not the transparent PNG
+                padding) is colorized, blended over the grayscale image above via
+                mix-blend-color. Uses the live --accent variable directly so it
+                stays in sync with the site's per-chapter/per-theme accent system. */}
+            <div
+              className="absolute inset-0 bg-accent opacity-40 mix-blend-color"
+              style={{
+                WebkitMaskImage: `url(${site.portrait.src})`,
+                maskImage: `url(${site.portrait.src})`,
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskPosition: "bottom",
+                maskPosition: "bottom",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+              }}
+            />
+          </>
+        )}
       </div>
     </section>
   );

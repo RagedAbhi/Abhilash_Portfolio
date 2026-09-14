@@ -1,101 +1,69 @@
 "use client";
 
 import { useRef } from "react";
-import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import type { MediaAsset } from "@/lib/keystatic/content";
+import { cn } from "@/lib/utils";
 import { buildAboutScrub } from "./About.animations";
 
 interface AboutProps {
   beats: string[];
-  portrait: MediaAsset;
 }
 
-export function About({ beats: aboutBeats, portrait }: AboutProps) {
+// Each beat sits in a different slice of a 12-column grid rather than a single
+// stacked column — an asymmetric, staggered composition so the section reads
+// as a designed page rather than a wall of paragraphs.
+const layoutClasses = [
+  "md:col-start-1 md:col-span-7",
+  "md:col-start-6 md:col-span-7",
+  "md:col-start-2 md:col-span-7",
+  "md:col-start-5 md:col-span-8",
+];
+
+export function About({ beats: aboutBeats }: AboutProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const parallaxRef = useRef<HTMLDivElement>(null);
-  const beatRefs = useRef<(HTMLParagraphElement | null)[]>([]);
+  const beatRefs = useRef<(HTMLDivElement | null)[]>([]);
   const reducedMotion = useReducedMotion();
 
   useGSAP(
     () => {
-      if (!sectionRef.current || !parallaxRef.current) return;
-      const beats = beatRefs.current.filter((el): el is HTMLParagraphElement => Boolean(el));
+      const beats = beatRefs.current.filter((el): el is HTMLDivElement => Boolean(el));
       if (!beats.length) return;
-      buildAboutScrub(
-        { section: sectionRef.current, beats, parallax: parallaxRef.current },
-        reducedMotion,
-      );
+      buildAboutScrub(beats, reducedMotion);
     },
     { scope: sectionRef, dependencies: [reducedMotion], revertOnUpdate: true },
   );
 
   return (
-    <div ref={sectionRef} className="relative flex h-screen items-center overflow-hidden px-6 sm:px-10">
+    <div
+      ref={sectionRef}
+      className="relative flex min-h-screen flex-col justify-center overflow-x-hidden px-6 py-20 sm:px-10"
+    >
+      <span className="mb-10 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+        02 — About
+      </span>
       <div className="relative mx-auto w-full max-w-6xl">
-        <div className="relative z-10 flex min-h-[260px] max-w-2xl flex-col justify-center sm:min-h-[200px]">
-          <span className="mb-8 block font-mono text-xs uppercase tracking-widest text-fg-muted">
-            02 — Formation
-          </span>
-          <div className="relative">
+        {/* Marked for TimelineBridge, which measures this box's edges to draw
+            the single line that runs through here and into Experience below —
+            no line is drawn by this component itself. */}
+        <div data-timeline-node="formation" className="relative">
+          <div className="grid grid-cols-1 gap-y-10 sm:pl-10 md:grid-cols-12 md:gap-x-8 md:gap-y-14">
             {aboutBeats.map((beat, index) => (
-              <p
+              <div
                 key={beat}
                 ref={(el) => {
                   beatRefs.current[index] = el;
                 }}
-                className="absolute inset-0 font-display text-2xl leading-snug text-fg sm:text-4xl"
+                className={cn("flex gap-4 sm:gap-6", layoutClasses[index % layoutClasses.length])}
               >
-                {beat}
-              </p>
+                <span className="shrink-0 pt-0.5 font-mono text-xs text-accent sm:pt-1">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <p className="font-display text-lg leading-snug text-fg sm:text-2xl">{beat}</p>
+              </div>
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Positioned relative to the full-width section (not the max-w-6xl text
-          column) and anchored past the section's own right edge, so it bleeds off
-          the right side of the screen instead of staying boxed inside the content
-          column — clipped by the section's own overflow-hidden. */}
-      <div
-        ref={parallaxRef}
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 hidden h-[94vh] sm:block"
-        style={{ width: "48vw", right: "-6vw" }}
-      >
-        <div className="absolute inset-0 scale-125 rounded-full bg-accent/20 blur-[100px]" />
-        {portrait.src && (
-          <>
-            <Image
-              src={portrait.src}
-              alt={portrait.alt}
-              fill
-              sizes="48vw"
-              className="object-contain object-bottom grayscale"
-            />
-            {/* Duotone tint: a solid accent-colored layer, masked to the portrait's
-                own alpha shape so only the visible photo (not the transparent PNG
-                padding) is colorized, blended over the grayscale image above via
-                mix-blend-color. Uses the live --accent variable directly (not a
-                static filter) so it stays in sync with the site's existing
-                per-chapter/per-theme accent system instead of a hardcoded hue.
-                Opacity kept low so the tint reads as a faded wash, not a flat color. */}
-            <div
-              className="absolute inset-0 bg-accent opacity-40 mix-blend-color"
-              style={{
-                WebkitMaskImage: `url(${portrait.src})`,
-                maskImage: `url(${portrait.src})`,
-                WebkitMaskSize: "contain",
-                maskSize: "contain",
-                WebkitMaskPosition: "bottom",
-                maskPosition: "bottom",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-              }}
-            />
-          </>
-        )}
       </div>
     </div>
   );

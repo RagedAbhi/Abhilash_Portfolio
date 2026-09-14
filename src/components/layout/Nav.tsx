@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { gsap } from "@/lib/gsap";
 import { useLenis } from "@/hooks/useLenis";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSiteStore } from "@/lib/store";
 import { chapters } from "@/lib/chapters";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -11,25 +12,78 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 export function Nav({ name }: { name: string }) {
   const navRef = useRef<HTMLElement>(null);
   const lenis = useLenis();
+  const reducedMotion = useReducedMotion();
   const activeSection = useSiteStore((state) => state.activeSection);
+  const loadingComplete = useSiteStore((state) => state.loadingComplete);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuOpenRef = useRef(menuOpen);
 
+  useEffect(() => {
+    menuOpenRef.current = menuOpen;
+  }, [menuOpen]);
+
+  // Fades in once, alongside Hero's own entrance (loadingComplete), and stays
+  // visible from the very first screen onward — no longer tied to scrolling
+  // past Hero into the next section.
   useGSAP(
     () => {
       if (!navRef.current) return;
       gsap.set(navRef.current, { autoAlpha: 0, y: -12 });
-
-      const trigger = ScrollTrigger.create({
-        trigger: "#arrival",
-        start: "top top",
-        end: "+=100%",
-        onLeave: () => gsap.to(navRef.current, { autoAlpha: 1, y: 0, duration: 0.5 }),
-        onEnterBack: () => gsap.to(navRef.current, { autoAlpha: 0, y: -12, duration: 0.4 }),
-      });
-
-      return () => trigger.kill();
+      if (!loadingComplete) return;
+      gsap.to(navRef.current, { autoAlpha: 1, y: 0, duration: 0.5 });
     },
-    { scope: navRef },
+    { scope: navRef, dependencies: [loadingComplete] },
+  );
+
+  // Hides on scroll down, reappears on scroll up — reclaims screen space
+  // while reading, without ever losing the ability to jump back to nav.
+  // Always shown near the very top and while the mobile menu is open.
+  useGSAP(
+    () => {
+      // Skipped under reduced motion — a nav that slides away on scroll is a
+      // UI motion some visitors specifically asked to avoid, not decoration.
+      if (!navRef.current || !loadingComplete || reducedMotion) return;
+      const nav = navRef.current;
+      let lastY = window.scrollY;
+      let hidden = false;
+
+      const setHidden = (next: boolean) => {
+        if (next === hidden) return;
+        hidden = next;
+        gsap.to(nav, {
+          yPercent: hidden ? -130 : 0,
+          duration: 0.4,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+      };
+
+      const REVEAL_ZONE = 80;
+
+      const onScroll = (y: number) => {
+        if (menuOpenRef.current || y <= REVEAL_ZONE) {
+          setHidden(false);
+        } else if (y > lastY) {
+          setHidden(true);
+        } else if (y < lastY) {
+          setHidden(false);
+        }
+        lastY = y;
+      };
+
+      if (lenis) {
+        const handler = (instance: { scroll: number }) => onScroll(instance.scroll);
+        lenis.on("scroll", handler);
+        return () => {
+          lenis.off("scroll", handler);
+        };
+      }
+
+      const handler = () => onScroll(window.scrollY);
+      window.addEventListener("scroll", handler, { passive: true });
+      return () => window.removeEventListener("scroll", handler);
+    },
+    { scope: navRef, dependencies: [loadingComplete, lenis, reducedMotion], revertOnUpdate: true },
   );
 
   const scrollToSection = (id: string) => (event: React.MouseEvent) => {

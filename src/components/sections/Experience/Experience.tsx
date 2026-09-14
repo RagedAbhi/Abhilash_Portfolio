@@ -12,34 +12,27 @@ function formatRange(start: string, end: string) {
 
 export function Experience({ entries: experience }: { entries: ExperienceEntry[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const reducedMotion = useReducedMotion();
 
   useGSAP(
     () => {
-      if (!sectionRef.current || !lineRef.current) return;
       const cards = cardRefs.current.filter((el): el is HTMLDivElement => Boolean(el));
       if (!cards.length) return;
-      buildExperienceScrub(
-        { section: sectionRef.current, line: lineRef.current, cards },
-        reducedMotion,
-      );
+      buildExperienceScrub(cards, reducedMotion);
     },
     { scope: sectionRef, dependencies: [reducedMotion], revertOnUpdate: true },
   );
 
   return (
-    <div ref={sectionRef} className="relative px-6 py-32 sm:px-10">
-      <span className="mb-16 block font-mono text-xs uppercase tracking-widest text-fg-muted">
-        03 — Proof
+    <div ref={sectionRef} className="relative overflow-x-hidden px-6 py-32 sm:px-10">
+      <span className="mb-16 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+        03 — Experience
       </span>
-      <div className="relative mx-auto max-w-4xl">
-        <div
-          ref={lineRef}
-          aria-hidden
-          className="absolute inset-y-0 left-1/2 hidden w-0.5 origin-top -translate-x-1/2 bg-accent sm:block"
-        />
+      {/* Marked for TimelineBridge, which measures this box's edges to draw
+          the single line that runs through here, continuing up from About
+          above — no line is drawn by this component itself. */}
+      <div data-timeline-node="proof" className="relative mx-auto max-w-4xl">
         <div className="flex flex-col gap-20">
           {experience.map((entry, index) => (
             <div

@@ -1,67 +1,34 @@
 import { gsap } from "@/lib/gsap";
-import { toggleWillChange } from "@/lib/animations/willChange";
 
-interface ProjectsRefs {
+interface ProjectsRevealRefs {
   section: HTMLElement;
-  track: HTMLElement;
-  panels: HTMLElement[];
+  textCol: HTMLElement | null;
+  imageCol: HTMLElement | null;
+  controls: HTMLElement | null;
 }
 
-export function buildProjectsScrub({ section, track, panels }: ProjectsRefs, reducedMotion: boolean) {
-  panels.forEach((panel) => {
-    const covers = Array.from(panel.querySelectorAll<HTMLElement>("[data-reveal-cover]"));
-    const meta = panel.querySelector<HTMLElement>("[data-reveal-meta]");
-    if (covers.length) gsap.set(covers, { clipPath: "inset(0% 0% 0% 0%)" });
-    if (meta) gsap.set(meta, { autoAlpha: 1, y: 0 });
+export function buildProjectsReveal(
+  { section, textCol, imageCol, controls }: ProjectsRevealRefs,
+  reducedMotion: boolean,
+) {
+  const pieces = [textCol, imageCol, controls].filter((el): el is HTMLElement => Boolean(el));
+  if (!pieces.length) return;
+
+  if (reducedMotion) {
+    gsap.set(pieces, { autoAlpha: 1, x: 0, y: 0 });
+    return;
+  }
+
+  // Text and cover reveal from opposite sides, controls settle in last — a
+  // staggered entrance instead of the whole block fading up as one piece.
+  if (textCol) gsap.set(textCol, { autoAlpha: 0, x: -24 });
+  if (imageCol) gsap.set(imageCol, { autoAlpha: 0, x: 24 });
+  if (controls) gsap.set(controls, { autoAlpha: 0, y: 16 });
+
+  const tl = gsap.timeline({
+    scrollTrigger: { trigger: section, start: "top 75%", toggleActions: "play none none reverse" },
   });
-
-  if (reducedMotion) return () => {};
-
-  const mm = gsap.matchMedia();
-
-  mm.add("(min-width: 768px)", () => {
-    panels.forEach((panel) => {
-      const covers = Array.from(panel.querySelectorAll<HTMLElement>("[data-reveal-cover]"));
-      const meta = panel.querySelector<HTMLElement>("[data-reveal-meta]");
-      if (covers.length) gsap.set(covers, { clipPath: "inset(0% 0% 0% 100%)" });
-      if (meta) gsap.set(meta, { autoAlpha: 0, y: 24 });
-    });
-
-    const getDistance = () => -(track.scrollWidth - window.innerWidth);
-
-    const scrollTween = gsap.to(track, {
-      x: getDistance,
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: () => `+=${-getDistance()}`,
-        pin: true,
-        scrub: 1,
-        invalidateOnRefresh: true,
-        snap: panels.length > 1 ? 1 / (panels.length - 1) : undefined,
-        ...toggleWillChange(track, "transform"),
-      },
-    });
-
-    panels.forEach((panel) => {
-      const covers = Array.from(panel.querySelectorAll<HTMLElement>("[data-reveal-cover]"));
-      const meta = panel.querySelector<HTMLElement>("[data-reveal-meta]");
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: panel,
-          containerAnimation: scrollTween,
-          start: "left 85%",
-          end: "left 40%",
-          scrub: true,
-          ...(covers.length ? toggleWillChange(covers, "clip-path") : {}),
-        },
-      });
-      if (covers.length) tl.to(covers, { clipPath: "inset(0% 0% 0% 0%)", ease: "none" }, 0);
-      if (meta) tl.to(meta, { autoAlpha: 1, y: 0, ease: "none" }, 0);
-    });
-  });
-
-  return () => mm.revert();
+  if (textCol) tl.to(textCol, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0);
+  if (imageCol) tl.to(imageCol, { autoAlpha: 1, x: 0, duration: 0.7, ease: "power3.out" }, 0.1);
+  if (controls) tl.to(controls, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.35);
 }

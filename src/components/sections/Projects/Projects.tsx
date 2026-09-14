@@ -6,25 +6,90 @@ import Image from "next/image";
 import { gsap } from "@/lib/gsap";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Project } from "@/lib/keystatic/content";
-import { buildProjectsScrub } from "./Projects.animations";
+import { buildProjectsReveal } from "./Projects.animations";
 import { cn } from "@/lib/utils";
-import { ExternalLinkIcon, GitHubIcon } from "@/components/ui/icons";
+import { ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, GitHubIcon } from "@/components/ui/icons";
 
 const coverAccents = ["--accent-arrival", "--accent-formation", "--accent-proof", "--accent-invitation"];
 
 export function Projects({ projects }: { projects: Project[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const descRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const textColRef = useRef<HTMLDivElement>(null);
+  const imageColRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const descRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
-  const toggleDescription = (index: number) => {
-    const el = descRefs.current[index];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [expanded, setExpanded] = useState(false);
+  const project = projects[activeIndex];
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+      buildProjectsReveal(
+        {
+          section: sectionRef.current,
+          textCol: textColRef.current,
+          imageCol: imageColRef.current,
+          controls: controlsRef.current,
+        },
+        reducedMotion,
+      );
+    },
+    { scope: sectionRef, dependencies: [reducedMotion], revertOnUpdate: true },
+  );
+
+  // Crossfade + slide transition between projects, direction-matched to the
+  // arrow pressed. useGSAP re-runs whenever activeIndex changes (the content
+  // has already swapped by then), so it only needs to handle the "entering"
+  // half — the "exiting" half runs beforehand in goTo, still on the old content.
+  useGSAP(
+    () => {
+      if (!rowRef.current) return;
+      if (reducedMotion) {
+        gsap.set(rowRef.current, { autoAlpha: 1, x: 0 });
+        return;
+      }
+      gsap.fromTo(
+        rowRef.current,
+        { autoAlpha: 0, x: direction * 32 },
+        { autoAlpha: 1, x: 0, duration: 0.45, ease: "power3.out" },
+      );
+    },
+    { dependencies: [activeIndex], revertOnUpdate: false },
+  );
+
+  const goTo = (nextIndex: number, dir: number) => {
+    setExpanded(false);
+    if (!rowRef.current || reducedMotion) {
+      setDirection(dir);
+      setActiveIndex(nextIndex);
+      return;
+    }
+    gsap.to(rowRef.current, {
+      autoAlpha: 0,
+      x: dir * -32,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: () => {
+        setDirection(dir);
+        setActiveIndex(nextIndex);
+      },
+    });
+  };
+
+  const goNext = () => goTo((activeIndex + 1) % projects.length, 1);
+  const goPrev = () => goTo((activeIndex - 1 + projects.length) % projects.length, -1);
+
+  const toggleDescription = () => {
+    const el = descRef.current;
     if (!el) return;
-    const isExpanding = !expanded[index];
-    setExpanded((prev) => ({ ...prev, [index]: isExpanding }));
+    const isExpanding = !expanded;
+    setExpanded(isExpanding);
 
     if (reducedMotion) {
       gsap.set(el, { height: isExpanding ? "auto" : 0, autoAlpha: isExpanding ? 1 : 0 });
@@ -38,167 +103,148 @@ export function Projects({ projects }: { projects: Project[] }) {
     });
   };
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current || !trackRef.current) return;
-      const panels = panelRefs.current.filter((el): el is HTMLDivElement => Boolean(el));
-      if (!panels.length) return;
-      return buildProjectsScrub(
-        { section: sectionRef.current, track: trackRef.current, panels },
-        reducedMotion,
-      );
-    },
-    { scope: sectionRef, dependencies: [reducedMotion], revertOnUpdate: true },
-  );
-
   return (
     <div
       ref={sectionRef}
       id="projects"
-      className={cn("relative", !reducedMotion && "md:h-screen md:overflow-hidden")}
+      className="relative flex min-h-screen flex-col justify-center overflow-x-hidden px-6 py-24 sm:px-10"
     >
-      <div
-        ref={trackRef}
-        data-cursor="drag"
-        className={cn(
-          "flex flex-col gap-16 px-6 pb-24 pt-4 sm:px-10",
-          // Falls back to a normal vertical stack under reduced motion, matching the
-          // mobile layout, since the JS-driven horizontal pin+scrub is skipped there.
-          !reducedMotion && "md:h-full md:flex-row md:gap-0 md:p-0",
-        )}
-      >
-        {projects.map((project, index) => (
-          <div
-            key={project.slug}
-            ref={(el) => {
-              panelRefs.current[index] = el;
-            }}
-            className={cn(
-              "relative flex flex-col overflow-hidden rounded-2xl",
-              project.coverImage.src ? "gap-6 pb-10 sm:pb-14" : "h-[70vh] justify-end",
-              !reducedMotion &&
-                "md:h-full md:w-screen md:flex-shrink-0 md:justify-end md:gap-0 md:rounded-none md:pb-0",
-            )}
-          >
-            <div
-              data-reveal-cover
-              aria-hidden
-              className="absolute inset-0"
-              style={{
-                background: `radial-gradient(120% 120% at 15% 10%, var(${coverAccents[index % coverAccents.length]}) 0%, transparent 45%), linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg) 70%)`,
-              }}
-            >
-              <span className="absolute -right-4 bottom-0 select-none font-display text-[40vw] font-medium leading-none text-fg/[0.04] md:text-[22vw]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
+      <span className="mb-16 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+        04 — Projects
+      </span>
+      <div ref={wrapperRef} className="mx-auto max-w-6xl">
+        <div ref={rowRef} className="flex flex-col gap-8 md:flex-row md:items-center md:gap-16">
+          <div ref={textColRef} className="flex flex-1 flex-col gap-3">
+            <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
+              {project.year ? `${project.year} — ${project.role}` : project.role}
+            </span>
+            <h3 className="font-display text-3xl text-fg sm:text-5xl">{project.title}</h3>
+            <p className="max-w-md text-sm leading-relaxed text-fg-muted sm:text-base">
+              {project.summary}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {project.stack.map((tech) => (
+                <span
+                  key={tech}
+                  className="rounded-full border border-fg/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-fg-muted"
+                >
+                  {tech}
+                </span>
+              ))}
             </div>
-            {project.coverImage.src && (
-              // Normal flex-flow sibling (pushes the meta block below it, avoiding
-              // overlap) whenever panels stack vertically — mobile, or desktop under
-              // reduced motion where the horizontal pin is skipped (matching the
-              // track's own !reducedMotion guard). Only pulled into absolute
-              // positioning for the actual pinned horizontal-gallery layout, so meta
-              // can independently anchor to the panel's bottom edge.
-              <div
-                data-reveal-cover
-                className={cn(
-                  "relative z-10 mx-auto mt-16 h-[20vh] w-[min(56%,480px)] -rotate-3 overflow-hidden rounded-xl border border-fg/10 shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] sm:mt-20 sm:h-[26vh]",
-                  !reducedMotion && "md:absolute md:left-1/2 md:top-28 md:mt-0 md:h-[30vh] md:-translate-x-1/2",
+            {(project.link || project.repo) && (
+              <div className="flex flex-wrap gap-4">
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor="hover"
+                    className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
+                  >
+                    <ExternalLinkIcon className="h-3 w-3" />
+                    Live Site
+                  </a>
                 )}
+                {project.repo && (
+                  <a
+                    href={project.repo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor="hover"
+                    className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
+                  >
+                    <GitHubIcon className="h-3 w-3" />
+                    Source
+                  </a>
+                )}
+              </div>
+            )}
+            {project.description && (
+              <button
+                type="button"
+                data-cursor="hover"
+                onClick={toggleDescription}
+                aria-expanded={expanded}
+                className="flex w-fit items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-accent transition-colors hover:text-fg"
               >
+                <span
+                  className={cn("inline-block transition-transform duration-300", expanded && "rotate-45")}
+                >
+                  +
+                </span>
+                <span className="underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-fg">
+                  {expanded ? "Less" : "More"}
+                </span>
+              </button>
+            )}
+            <div ref={descRef} style={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <p className="max-w-md pt-2 text-sm leading-relaxed text-fg-muted/80 sm:text-base">
+                {project.description}
+              </p>
+            </div>
+          </div>
+
+          <div ref={imageColRef} className="w-full flex-1">
+            {project.coverImage.src && project.coverImage.width && project.coverImage.height ? (
+              <div className="-rotate-3 overflow-hidden rounded-2xl border border-fg/10 shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0">
+                <Image
+                  src={project.coverImage.src}
+                  alt={project.coverImage.alt}
+                  width={project.coverImage.width}
+                  height={project.coverImage.height}
+                  sizes="(min-width: 768px) 45vw, 100vw"
+                  className="h-auto w-full"
+                />
+              </div>
+            ) : project.coverImage.src ? (
+              <div className="relative aspect-[4/3] w-full -rotate-3 overflow-hidden rounded-2xl border border-fg/10 bg-bg-elevated shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0">
                 <Image
                   src={project.coverImage.src}
                   alt={project.coverImage.alt}
                   fill
-                  sizes="(min-width: 768px) 60vw, 90vw"
-                  className="object-cover"
+                  sizes="(min-width: 768px) 45vw, 100vw"
+                  className="object-contain"
+                />
+              </div>
+            ) : (
+              <div className="relative aspect-[4/3] w-full -rotate-3 overflow-hidden rounded-2xl border border-fg/10 bg-bg-elevated shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `radial-gradient(120% 120% at 15% 10%, var(${coverAccents[activeIndex % coverAccents.length]}) 0%, transparent 45%), linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg) 70%)`,
+                  }}
                 />
               </div>
             )}
-            <div
-              data-reveal-meta
-              className="relative z-10 flex flex-col gap-3 bg-gradient-to-t from-bg via-bg/70 to-transparent p-6 pt-24 sm:p-10 sm:pt-32"
-            >
-              <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
-                {project.year ? `${project.year} — ${project.role}` : project.role}
-              </span>
-              <h3 className="font-display text-4xl text-fg sm:text-6xl">{project.title}</h3>
-              <p className="max-w-md text-sm leading-relaxed text-fg-muted sm:text-base">
-                {project.summary}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {project.stack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="rounded-full border border-fg/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-fg-muted"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-              {(project.link || project.repo) && (
-                <div className="flex flex-wrap gap-4">
-                  {project.link && (
-                    <a
-                      href={project.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-cursor="view"
-                      className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
-                    >
-                      <ExternalLinkIcon className="h-3 w-3" />
-                      Live Site
-                    </a>
-                  )}
-                  {project.repo && (
-                    <a
-                      href={project.repo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-cursor="view"
-                      className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
-                    >
-                      <GitHubIcon className="h-3 w-3" />
-                      Source
-                    </a>
-                  )}
-                </div>
-              )}
-              {project.description && (
-                <button
-                  type="button"
-                  data-cursor="view"
-                  onClick={() => toggleDescription(index)}
-                  aria-expanded={Boolean(expanded[index])}
-                  className="flex w-fit items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-accent transition-colors hover:text-fg"
-                >
-                  <span
-                    className={cn(
-                      "inline-block transition-transform duration-300",
-                      expanded[index] && "rotate-45",
-                    )}
-                  >
-                    +
-                  </span>
-                  <span className="underline decoration-accent/40 underline-offset-4 transition-colors hover:decoration-fg">
-                    {expanded[index] ? "Less" : "More"}
-                  </span>
-                </button>
-              )}
-              <div
-                ref={(el) => {
-                  descRefs.current[index] = el;
-                }}
-                style={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <p className="max-w-md pt-4 text-sm leading-relaxed text-fg-muted/80 sm:text-base">
-                  {project.description}
-                </p>
-              </div>
-            </div>
           </div>
-        ))}
+        </div>
+
+        {projects.length > 1 && (
+          <div ref={controlsRef} className="mt-12 flex items-center justify-center gap-8">
+            <button
+              type="button"
+              onClick={goPrev}
+              aria-label="Previous project"
+              data-cursor="hover"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-fg/10 text-fg transition-colors hover:bg-fg/10"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+            </button>
+            <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
+              {String(activeIndex + 1).padStart(2, "0")}
+            </span>
+            <button
+              type="button"
+              onClick={goNext}
+              aria-label="Next project"
+              data-cursor="hover"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-fg/10 text-fg transition-colors hover:bg-fg/10"
+            >
+              <ArrowRightIcon className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

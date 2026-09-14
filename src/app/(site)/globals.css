@@ -9,7 +9,8 @@
   --accent-arrival: #c6ff3d;
   --accent-formation: #5b8cff;
   --accent-proof: #ff6b4a;
-  --accent-invitation: #f2ede4;
+  --accent-projects: #b48eff;
+  --accent-invitation: #ffc857;
 }
 
 :root[data-theme="light"] {
@@ -21,7 +22,8 @@
   --accent-arrival: #6a9c1f;
   --accent-formation: #2f5fd6;
   --accent-proof: #d94f28;
-  --accent-invitation: #3a352c;
+  --accent-projects: #7c3aed;
+  --accent-invitation: #b8790a;
 }
 
 @theme inline {
@@ -41,6 +43,7 @@
 html {
   background: var(--bg);
   scrollbar-color: var(--fg-muted) transparent;
+  overflow-x: hidden;
 }
 
 body {

@@ -9,24 +9,36 @@ interface HeroRefs {
   background: HTMLElement;
   headline: HTMLElement;
   subtext: HTMLElement;
+  portrait: HTMLElement;
+  scrollCue: HTMLElement;
   glowWrapper: HTMLElement;
   glow: HTMLElement;
 }
 
-export function setHeroInitialState({ background, headline, subtext }: HeroRefs, reducedMotion: boolean) {
+export function setHeroInitialState(
+  { background, headline, subtext, portrait, scrollCue }: HeroRefs,
+  reducedMotion: boolean,
+) {
   gsap.set(background, { clipPath: reducedMotion ? "inset(0% 0 0 0)" : "inset(100% 0 0 0)" });
   gsap.set(subtext, { autoAlpha: 0, y: 24 });
+  gsap.set(portrait, { autoAlpha: 0, y: 24 });
+  gsap.set(scrollCue, { autoAlpha: 0, y: 10 });
   if (reducedMotion) {
     gsap.set(headline, { autoAlpha: 0 });
   }
 }
 
-export function playHeroEntrance({ background, headline, subtext }: HeroRefs, reducedMotion: boolean) {
+export function playHeroEntrance(
+  { background, headline, subtext, portrait, scrollCue }: HeroRefs,
+  reducedMotion: boolean,
+) {
   if (reducedMotion) {
     const tl = gsap.timeline();
     tl.set(background, { clipPath: "inset(0% 0 0 0)" });
     tl.to(headline, { autoAlpha: 1, duration: 0.6 });
     tl.to(subtext, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
+    tl.to(portrait, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
+    tl.to(scrollCue, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
     return { timeline: tl, revert: () => {} };
   }
 
@@ -42,19 +54,67 @@ export function playHeroEntrance({ background, headline, subtext }: HeroRefs, re
   master.add(buildClipReveal(background, { direction: "up", duration: 1.3, easeName: ease.exit }), 0);
   master.add(splitTl, 0.2);
   master.to(subtext, { autoAlpha: 1, y: 0, duration: 0.8, ease: ease.standard }, "-=0.4");
+  master.to(portrait, { autoAlpha: 1, y: 0, duration: 0.8, ease: ease.standard }, "<");
+  master.to(scrollCue, { autoAlpha: 1, y: 0, duration: 0.6, ease: ease.standard }, "-=0.3");
 
   return { timeline: master, revert };
 }
 
 export function buildHeroAmbientBackground(
-  { section, glowWrapper, glow }: HeroRefs,
+  { section, glowWrapper, glow, scrollCue, portrait }: HeroRefs,
   reducedMotion: boolean,
 ) {
   if (reducedMotion) {
     gsap.set(glowWrapper, { x: 0, y: 0 });
     gsap.set(glow, { xPercent: 0, yPercent: 0 });
+    gsap.set(portrait, { yPercent: 0 });
     return;
   }
+
+  // Continuous idle loop on the scroll cue — arrow bobs and gently pulses,
+  // the label breathes slightly out of phase, for as long as the visitor
+  // lingers on Hero.
+  const arrow = scrollCue.querySelector<HTMLElement>("[data-scroll-arrow]");
+  const label = scrollCue.querySelector<HTMLElement>("[data-scroll-label]");
+  const arrowBob = arrow
+    ? gsap.to(arrow, {
+        y: 8,
+        scale: 1.15,
+        transformOrigin: "center",
+        duration: 1.1,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      })
+    : null;
+  const labelPulse = label
+    ? gsap.to(label, {
+        opacity: 0.5,
+        duration: 1.1,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 0.35,
+      })
+    : null;
+
+  // Portrait drifts at a slower rate than the page scroll — a subtle depth
+  // cue independent of the pinned exit-scrub above (different refs, no
+  // overlap with headline/subtext/background/scrollCue).
+  const portraitParallax = gsap.fromTo(
+    portrait,
+    { yPercent: -6 },
+    {
+      yPercent: 10,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1,
+      },
+    },
+  );
 
   const driftX = gsap.to(glow, {
     xPercent: 15,
@@ -108,24 +168,51 @@ export function buildHeroAmbientBackground(
   return () => {
     section.removeEventListener("pointermove", onPointerMove);
     scrollTrigger.kill();
+    arrowBob?.kill();
+    labelPulse?.kill();
+    portraitParallax.scrollTrigger?.kill();
+    portraitParallax.kill();
   };
 }
 
-export function buildHeroExitScrub({ section, background, headline, subtext }: HeroRefs, reducedMotion: boolean) {
+export function buildHeroExitScrub(
+  { section, background, headline, subtext, scrollCue }: HeroRefs,
+  reducedMotion: boolean,
+) {
   if (reducedMotion) return;
 
+  // The cue's own visibility is driven below by a tight progress threshold,
+  // not by this timeline — keeping it as the single writer of scrollCue's
+  // opacity avoids a repeat of the earlier two-ScrollTriggers-one-property bug.
+  const HIDE_AT = 0.04;
+  let cueHidden = false;
+
+  // Not pinned: Hero fades/parallaxes out over its own natural scroll-through
+  // distance (its own height) instead of holding the page captive for an
+  // extra viewport of scroll before About appears — scrolling should move
+  // straight into the next section, not stall on a scroll-jacked transition.
   ScrollTrigger.create({
     trigger: section,
     start: "top top",
-    end: "+=100%",
-    pin: true,
-    pinSpacing: true,
+    end: "bottom top",
     scrub: 1,
     animation: gsap
       .timeline()
       .to(headline, { yPercent: -40, scale: 0.9, autoAlpha: 0, ease: "none" }, 0)
       .fromTo(subtext, { autoAlpha: 1, yPercent: 0 }, { yPercent: -20, autoAlpha: 0, ease: "none" }, 0)
       .to(background, { yPercent: -20, ease: "none" }, 0),
-    ...toggleWillChange([headline, subtext, background], "transform, opacity"),
+    onUpdate: (self) => {
+      const shouldHide = self.progress > HIDE_AT;
+      if (shouldHide === cueHidden) return;
+      cueHidden = shouldHide;
+      gsap.to(scrollCue, {
+        autoAlpha: shouldHide ? 0 : 1,
+        y: shouldHide ? 14 : 0,
+        duration: 0.25,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    },
+    ...toggleWillChange([headline, subtext, background, scrollCue], "transform, opacity"),
   });
 }

@@ -1,5 +1,6 @@
 import { statSync } from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
 import { reader } from "./reader";
 
 // Keystatic overwrites the same file path on every re-upload (e.g. re-uploading
@@ -22,6 +23,22 @@ function withCacheBust(publicPath: string): string {
 export interface MediaAsset {
   src: string;
   alt: string;
+  width?: number;
+  height?: number;
+}
+
+// Lets a card size itself to the image's real aspect ratio (no cropping, no
+// letterboxing) instead of forcing it into a fixed box shape.
+async function getImageDimensions(publicPath: string): Promise<{ width: number; height: number } | undefined> {
+  if (!publicPath) return undefined;
+  try {
+    const filePath = path.join(process.cwd(), "public", publicPath);
+    const { width, height } = await sharp(filePath).metadata();
+    if (!width || !height) return undefined;
+    return { width, height };
+  } catch {
+    return undefined;
+  }
 }
 
 export interface Project {
@@ -98,22 +115,27 @@ export async function getAboutBeats(): Promise<string[]> {
 
 export async function getProjects(): Promise<Project[]> {
   const entries = await reader.collections.projects.all();
-  return entries
-    .map(({ slug, entry }) => ({
-      slug,
-      title: entry.title,
-      year: entry.year ?? undefined,
-      role: entry.role,
-      summary: entry.summary,
-      description: entry.description,
-      stack: [...entry.stack],
-      coverImage: { src: withCacheBust(entry.coverImage ?? ""), alt: entry.coverImageAlt ?? "" },
-      link: entry.link || undefined,
-      repo: entry.repo || undefined,
-      featured: entry.featured,
-      order: entry.order ?? 0,
-    }))
-    .sort((a, b) => a.order - b.order);
+  const projects = await Promise.all(
+    entries.map(async ({ slug, entry }) => {
+      const coverPath = entry.coverImage ?? "";
+      const dimensions = await getImageDimensions(coverPath);
+      return {
+        slug,
+        title: entry.title,
+        year: entry.year ?? undefined,
+        role: entry.role,
+        summary: entry.summary,
+        description: entry.description,
+        stack: [...entry.stack],
+        coverImage: { src: withCacheBust(coverPath), alt: entry.coverImageAlt ?? "", ...dimensions },
+        link: entry.link || undefined,
+        repo: entry.repo || undefined,
+        featured: entry.featured,
+        order: entry.order ?? 0,
+      };
+    }),
+  );
+  return projects.sort((a, b) => a.order - b.order);
 }
 
 export async function getExperience(): Promise<ExperienceEntry[]> {

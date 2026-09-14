@@ -17,7 +17,7 @@ interface VariantStyle {
 const variantStyles: Record<CursorVariant, VariantStyle> = {
   default: { dotScale: 1, ringScale: 0.2, ringOpacity: 0.2, label: null },
   link: { dotScale: 0.4, ringScale: 0.55, ringOpacity: 1, label: null },
-  view: { dotScale: 0, ringScale: 1, ringOpacity: 1, label: "View" },
+  hover: { dotScale: 0, ringScale: 0.85, ringOpacity: 1, label: null },
   drag: { dotScale: 0, ringScale: 1, ringOpacity: 1, label: "Drag" },
 };
 
@@ -74,7 +74,7 @@ export function CustomCursor() {
       const target = (event.target as HTMLElement)?.closest("[data-cursor]");
       const variant = target?.getAttribute("data-cursor");
       setCursorVariant(
-        variant === "link" || variant === "view" || variant === "drag" ? variant : "default",
+        variant === "link" || variant === "hover" || variant === "drag" ? variant : "default",
       );
     };
 
@@ -109,13 +109,15 @@ export function CustomCursor() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[70] mix-blend-difference"
+      className="pointer-events-none fixed left-0 top-0 z-[90] mix-blend-difference"
     >
       <div
         ref={ringRef}
         className={cn(
           "absolute left-0 top-0 rounded-full border transition-colors duration-200",
-          cursorVariant === "link" ? "border-fg bg-transparent" : "border-transparent bg-fg",
+          cursorVariant === "link" && "border-fg bg-transparent",
+          cursorVariant === "hover" && "border-transparent bg-accent",
+          cursorVariant !== "link" && cursorVariant !== "hover" && "border-transparent bg-fg",
         )}
         style={{ width: 64, height: 64 }}
       >
