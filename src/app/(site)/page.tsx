@@ -12,15 +12,17 @@ import {
   getProjects,
   getExperience,
   getSkillGroups,
+  getFunFacts,
 } from "@/lib/keystatic/content";
 
 export default async function Home() {
-  const [site, beats, projects, experience, skillGroups] = await Promise.all([
+  const [site, beats, projects, experience, skillGroups, funFacts] = await Promise.all([
     getSiteSettings(),
     getAboutBeats(),
     getProjects(),
     getExperience(),
     getSkillGroups(),
+    getFunFacts(),
   ]);
 
   return (
@@ -36,7 +38,7 @@ export default async function Home() {
         <Projects projects={projects} />
       </section>
       <section id="invitation" className="border-t border-fg/5">
-        <Contact site={site} />
+        <Contact site={site} funFacts={funFacts} />
       </section>
       <ProjectsFoxBridge />
     </main>

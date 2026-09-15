@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { useSiteStore, type CursorVariant } from "@/lib/store";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -41,7 +41,12 @@ export function CustomCursor() {
     };
   }, [enabled]);
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the dot/ring are centered and scaled
+  // down to their resting size before the browser paints — otherwise they
+  // render for one frame at their raw, unstyled size (64px, full opacity,
+  // pinned to the page's top-left corner) before this ever runs, which
+  // shows up as a stray solid circle in that corner.
+  useLayoutEffect(() => {
     if (!enabled || !dotRef.current || !ringRef.current) return;
 
     const dot = dotRef.current;
@@ -57,6 +62,13 @@ export function CustomCursor() {
       scale: variantStyles.default.ringScale,
       opacity: variantStyles.default.ringOpacity,
     });
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled || !dotRef.current || !ringRef.current) return;
+
+    const dot = dotRef.current;
+    const ring = ringRef.current;
 
     const moveDotX = gsap.quickTo(dot, "x", { duration: 0.15, ease: "power3" });
     const moveDotY = gsap.quickTo(dot, "y", { duration: 0.15, ease: "power3" });

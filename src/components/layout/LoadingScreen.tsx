@@ -85,7 +85,12 @@ export function LoadingScreen() {
         {
           value: 100,
           duration: 1.4,
-          ease: "power2.inOut",
+          // power1.out (fast start, decelerating) rather than power2.inOut
+          // (slow-fast-slow) — the latter sits visibly near 0% for its own
+          // first quarter-second or so by design, on top of whatever the
+          // page's own initial hydration work costs, compounding into a
+          // counter that reads as stuck rather than counting up.
+          ease: "power1.out",
           onUpdate: () => {
             if (countRef.current) {
               countRef.current.textContent = String(Math.round(counter.value));

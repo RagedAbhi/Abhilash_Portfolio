@@ -7,7 +7,7 @@ export default config({
   ui: {
     brand: { name: "Portfolio Content" },
     navigation: {
-      Site: ["siteSettings", "aboutContent"],
+      Site: ["siteSettings", "aboutContent", "funFacts"],
       Work: ["projects", "experience", "skillGroups"],
     },
   },
@@ -58,6 +58,23 @@ export default config({
           {
             label: "Narrative beats (in order)",
             itemLabel: (props) => props.value?.slice(0, 60) || "Beat",
+          },
+        ),
+      },
+    }),
+    funFacts: singleton({
+      label: "Fun Facts",
+      path: "content/fun-facts",
+      schema: {
+        facts: fields.array(
+          fields.object({
+            emoji: fields.text({ label: "Emoji", defaultValue: "✨" }),
+            label: fields.text({ label: "Short label (e.g. Gaming)" }),
+            text: fields.text({ label: "Fun fact", multiline: true }),
+          }),
+          {
+            label: "Facts",
+            itemLabel: (props) => props.fields.label.value || "Fact",
           },
         ),
       },

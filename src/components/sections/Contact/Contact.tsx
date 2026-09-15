@@ -3,14 +3,15 @@
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import type { SiteMeta } from "@/lib/keystatic/content";
+import type { SiteMeta, FunFact } from "@/lib/keystatic/content";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { DownloadIcon } from "@/components/ui/icons";
+import { FunFactCards } from "./FunFactCards";
 import { buildContactReveal } from "./Contact.animations";
 
 type FormStatus = "idle" | "sent";
 
-export function Contact({ site }: { site: SiteMeta }) {
+export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
@@ -182,6 +183,12 @@ export function Contact({ site }: { site: SiteMeta }) {
           </div>
         </form>
       </div>
+
+      {funFacts.length > 0 && (
+        <div className="absolute bottom-6 right-6 z-10 sm:bottom-10 sm:right-10">
+          <FunFactCards facts={funFacts} />
+        </div>
+      )}
     </div>
   );
 }

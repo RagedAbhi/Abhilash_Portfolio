@@ -1,0 +1,19 @@
+facts:
+  - emoji: "🎮"
+    label: Placeholder — Gaming
+    text: Replace this with a real fun fact about your gaming habits.
+  - emoji: "📷"
+    label: Placeholder — Photography
+    text: Replace this with a real fun fact about photography or a hobby.
+  - emoji: "☕"
+    label: Placeholder — Coffee
+    text: Replace this with a real fun fact about coffee, food, or a daily ritual.
+  - emoji: "🎧"
+    label: Placeholder — Music
+    text: Replace this with a real fun fact about music you like.
+  - emoji: "📚"
+    label: Placeholder — Reading
+    text: Replace this with a real fun fact about a book, show, or topic you nerd out on.
+  - emoji: "✈️"
+    label: Placeholder — Travel
+    text: Replace this with a real fun fact about a place you've been or want to go.

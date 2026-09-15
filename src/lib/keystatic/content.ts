@@ -113,6 +113,18 @@ export async function getAboutBeats(): Promise<string[]> {
   return data ? [...data.beats] : [];
 }
 
+export interface FunFact {
+  emoji: string;
+  label: string;
+  text: string;
+}
+
+export async function getFunFacts(): Promise<FunFact[]> {
+  const data = await reader.singletons.funFacts.read();
+  if (!data) return [];
+  return data.facts.map((f) => ({ emoji: f.emoji, label: f.label, text: f.text }));
+}
+
 export async function getProjects(): Promise<Project[]> {
   const entries = await reader.collections.projects.all();
   const projects = await Promise.all(
