@@ -1,5 +1,6 @@
 import { Hero } from "@/components/sections/Hero/Hero";
 import { TimelineBridge } from "@/components/layout/TimelineBridge";
+import { ProjectsFoxBridge } from "@/components/layout/ProjectsFoxBridge";
 import { About } from "@/components/sections/About/About";
 import { Skills } from "@/components/sections/Skills/Skills";
 import { Experience } from "@/components/sections/Experience/Experience";
@@ -37,6 +38,7 @@ export default async function Home() {
       <section id="invitation" className="border-t border-fg/5">
         <Contact site={site} />
       </section>
+      <ProjectsFoxBridge />
     </main>
   );
 }

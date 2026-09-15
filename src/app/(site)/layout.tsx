@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <NoiseOverlay />
           <CustomCursor />
           <ProgressIndicator />
-          <Nav name={site.name} />
+          <Nav name={site.name} resumeUrl={site.resumeUrl} />
           <ThemeShift />
           {children}
         </SmoothScrollProvider>

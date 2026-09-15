@@ -4,17 +4,36 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { SkillGroup } from "@/lib/keystatic/content";
-import { buildSkillsReveal } from "./Skills.animations";
+import { buildSkillsReveal, buildSkillsFoxGuide } from "./Skills.animations";
+import { FoxIcon } from "@/components/ui/FoxIcon";
 
 export function Skills({ groups: skills }: { groups: SkillGroup[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const barWrapRef = useRef<HTMLDivElement>(null);
+  const foxGroupRef = useRef<SVGGElement>(null);
   const reducedMotion = useReducedMotion();
 
   useGSAP(
     () => {
       if (!sectionRef.current || !trackRef.current) return;
       buildSkillsReveal(sectionRef.current, trackRef.current, reducedMotion);
+    },
+    { scope: sectionRef, dependencies: [reducedMotion], revertOnUpdate: true },
+  );
+
+  useGSAP(
+    () => {
+      if (!sectionRef.current || !trackRef.current || !barWrapRef.current || !foxGroupRef.current) return;
+      return buildSkillsFoxGuide(
+        {
+          section: sectionRef.current,
+          track: trackRef.current,
+          barWrap: barWrapRef.current,
+          foxGroup: foxGroupRef.current,
+        },
+        reducedMotion,
+      );
     },
     { scope: sectionRef, dependencies: [reducedMotion], revertOnUpdate: true },
   );
@@ -60,6 +79,15 @@ export function Skills({ groups: skills }: { groups: SkillGroup[] }) {
       <span className="mb-16 block font-mono text-base uppercase tracking-widest text-fg sm:text-xl">
         Skills
       </span>
+
+      <div ref={barWrapRef} aria-hidden className="relative mb-6 hidden h-12 sm:block">
+        <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-fg/10" />
+        <svg className="pointer-events-none absolute inset-0 overflow-visible" width="100%" height="100%">
+          <g ref={foxGroupRef} style={{ color: "var(--accent)" }}>
+            <FoxIcon />
+          </g>
+        </svg>
+      </div>
 
       <div
         ref={trackRef}

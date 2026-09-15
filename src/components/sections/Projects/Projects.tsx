@@ -65,6 +65,7 @@ export function Projects({ projects }: { projects: Project[] }) {
 
   const goTo = (nextIndex: number, dir: number) => {
     setExpanded(false);
+    window.dispatchEvent(new Event("fox:project-hop"));
     if (!rowRef.current || reducedMotion) {
       setDirection(dir);
       setActiveIndex(nextIndex);
@@ -112,7 +113,7 @@ export function Projects({ projects }: { projects: Project[] }) {
       <span className="mb-16 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
         04 — Projects
       </span>
-      <div ref={wrapperRef} className="mx-auto max-w-6xl">
+      <div ref={wrapperRef} className="w-full mx-auto max-w-6xl">
         <div ref={rowRef} className="flex flex-col gap-8 md:flex-row md:items-center md:gap-16">
           <div ref={textColRef} className="flex flex-1 flex-col gap-3">
             <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
@@ -186,27 +187,48 @@ export function Projects({ projects }: { projects: Project[] }) {
           </div>
 
           <div ref={imageColRef} className="w-full flex-1">
-            {project.coverImage.src && project.coverImage.width && project.coverImage.height ? (
-              <div className="-rotate-3 overflow-hidden rounded-2xl border border-fg/10 shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0">
-                <Image
-                  src={project.coverImage.src}
-                  alt={project.coverImage.alt}
-                  width={project.coverImage.width}
-                  height={project.coverImage.height}
-                  sizes="(min-width: 768px) 45vw, 100vw"
-                  className="h-auto w-full"
-                />
-              </div>
-            ) : project.coverImage.src ? (
-              <div className="relative aspect-[4/3] w-full -rotate-3 overflow-hidden rounded-2xl border border-fg/10 bg-bg-elevated shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0">
-                <Image
-                  src={project.coverImage.src}
-                  alt={project.coverImage.alt}
-                  fill
-                  sizes="(min-width: 768px) 45vw, 100vw"
-                  className="object-contain"
-                />
-              </div>
+            {project.coverImage.src ? (
+              (() => {
+                const cardClass =
+                  "relative block w-full -rotate-3 overflow-hidden rounded-2xl border border-fg/10 bg-bg-elevated shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0";
+                // Sized to the cover image's own real aspect ratio — see the
+                // comment on getImageDimensions in content.ts — so the card's
+                // proportions match the image exactly instead of a fixed
+                // 4:3 box letterboxing it with black bars whenever the real
+                // image is a different shape.
+                const cardStyle = {
+                  aspectRatio:
+                    project.coverImage.width && project.coverImage.height
+                      ? `${project.coverImage.width} / ${project.coverImage.height}`
+                      : "4 / 3",
+                };
+                const image = (
+                  <Image
+                    src={project.coverImage.src}
+                    alt={project.coverImage.alt}
+                    fill
+                    sizes="(min-width: 768px) 45vw, 100vw"
+                    className="object-contain"
+                  />
+                );
+                return project.link ? (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-cursor="hover"
+                    aria-label={`Open ${project.title} live site`}
+                    className={cardClass}
+                    style={cardStyle}
+                  >
+                    {image}
+                  </a>
+                ) : (
+                  <div className={cardClass} style={cardStyle}>
+                    {image}
+                  </div>
+                );
+              })()
             ) : (
               <div className="relative aspect-[4/3] w-full -rotate-3 overflow-hidden rounded-2xl border border-fg/10 bg-bg-elevated shadow-[8px_24px_45px_-10px_rgba(0,0,0,0.55)] transition-transform duration-300 hover:rotate-0">
                 <div
@@ -231,7 +253,10 @@ export function Projects({ projects }: { projects: Project[] }) {
             >
               <ArrowLeftIcon className="h-4 w-4" />
             </button>
-            <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
+            <span
+              data-fox-node="project-index"
+              className="font-mono text-xs uppercase tracking-widest text-fg-muted"
+            >
               {String(activeIndex + 1).padStart(2, "0")}
             </span>
             <button

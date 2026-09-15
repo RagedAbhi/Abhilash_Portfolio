@@ -11,6 +11,7 @@ stack:
   - React
   - Three.js
   - GSAP
+coverImage: /images/projects/apple-clone/coverImage.png
 link: https://apple-clone-beta-eight.vercel.app/
 repo: https://github.com/RagedAbhi/Apple_Clone
 featured: true

@@ -152,8 +152,20 @@ export function Hero({ site }: HeroProps) {
       {/* Positioned relative to the section and anchored past its own right edge,
           so it bleeds off the right side of the screen instead of staying boxed
           inside the content column — clipped by the section's own overflow-hidden. */}
+      {/* Static measurement target for TimelineBridge's panda hand-off — a
+          never-transformed twin of the portrait box's own static geometry,
+          since portraitRef itself is a live GSAP target (parallax, entrance,
+          exit) whose rendered rect moves and can't be used for measurement. */}
+      <div
+        data-timeline-node="portrait"
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 hidden h-[92vh] sm:block"
+        style={{ width: "48vw", right: "-6vw" }}
+      />
+
       <div
         ref={portraitRef}
+        data-hero-portrait
         aria-hidden
         className="pointer-events-none absolute bottom-0 hidden h-[92vh] sm:block"
         style={{ width: "48vw", right: "-6vw" }}

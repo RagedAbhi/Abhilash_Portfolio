@@ -81,7 +81,7 @@ export function Contact({ site }: { site: SiteMeta }) {
 
       <div className="relative flex flex-col justify-between gap-12 md:w-[42%]">
         <div>
-          <span className="font-mono text-xs uppercase tracking-widest text-accent">
+          <span className="font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
             05 — Contact
           </span>
           <h2

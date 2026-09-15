@@ -191,6 +191,11 @@ export function buildHeroExitScrub(
   // distance (its own height) instead of holding the page captive for an
   // extra viewport of scroll before About appears — scrolling should move
   // straight into the next section, not stall on a scroll-jacked transition.
+  // Portrait is deliberately NOT included here — TimelineBridge owns its
+  // entire exit (shrink/move/fade) so it can be tightly co-timed against the
+  // fox's own fade-in on the exact same shared progress value; splitting that
+  // across two independent triggers is what caused the fox and photo to
+  // overlap for an extended stretch instead of handing off cleanly.
   ScrollTrigger.create({
     trigger: section,
     start: "top top",

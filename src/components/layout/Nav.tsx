@@ -8,8 +8,9 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSiteStore } from "@/lib/store";
 import { chapters } from "@/lib/chapters";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { DownloadIcon } from "@/components/ui/icons";
 
-export function Nav({ name }: { name: string }) {
+export function Nav({ name, resumeUrl }: { name: string; resumeUrl?: string }) {
   const navRef = useRef<HTMLElement>(null);
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
@@ -126,6 +127,17 @@ export function Nav({ name }: { name: string }) {
               </a>
             ))}
           </nav>
+          {resumeUrl && (
+            <a
+              href={resumeUrl}
+              download
+              data-cursor="link"
+              className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
+            >
+              <DownloadIcon className="h-3.5 w-3.5" />
+              Resume
+            </a>
+          )}
           <ThemeToggle />
         </div>
 
@@ -174,6 +186,17 @@ export function Nav({ name }: { name: string }) {
             {chapter.label}
           </a>
         ))}
+        {resumeUrl && (
+          <a
+            href={resumeUrl}
+            download
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-fg-muted"
+          >
+            <DownloadIcon className="h-3.5 w-3.5" />
+            Download Resume
+          </a>
+        )}
         <div className="mt-4 flex items-center gap-3 font-mono text-xs uppercase tracking-widest text-fg-muted">
           <ThemeToggle />
           <span>Theme</span>

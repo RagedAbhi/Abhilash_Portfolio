@@ -2,25 +2,32 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { buildTimelineReveal } from "./TimelineBridge.animations";
+import { FoxIcon } from "@/components/ui/FoxIcon";
 
 interface Geometry {
   top: number;
   height: number;
   width: number;
   jogY: number;
+  fromX: number;
+  toX: number;
+  proofBottom: number;
   d: string;
+  portraitAnchor: { x: number; y: number } | null;
 }
 
 // The single timeline line that runs through both Formation (About) and Proof
 // (Experience): straight down the Formation margin, one clean bend, straight
 // down the Proof centerline. Drawn as one continuous path — rendered here,
 // not as separate line elements in either section — so there's no seam where
-// two differently-rendered lines would otherwise meet.
+// two differently-rendered lines would otherwise meet. A small fox leads
+// the line as it draws in, having flown in from Hero's portrait as it exits.
 export function TimelineBridge() {
   const svgRef = useRef<SVGSVGElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
+  const pandaGroupRef = useRef<SVGGElement>(null);
   const [geometry, setGeometry] = useState<Geometry | null>(null);
   const reducedMotion = useReducedMotion();
 
@@ -53,6 +60,22 @@ export function TimelineBridge() {
       // browsers, which was pushing the whole page into horizontal overflow).
       const width = Math.max(fromX, toX) + 40;
 
+      // Hero's portrait box — a static, never-transformed twin marker (see
+      // Hero.tsx) so its rect doesn't move under the portrait's own parallax
+      // and exit animations. Anchored at the box's horizontal center, well
+      // inboard of the box's own right edge (which intentionally bleeds past
+      // 100vw under Hero's clipping) — this svg has no clipping ancestor, so
+      // anchoring at the edge would reintroduce a horizontal-overflow bug.
+      const portraitEl = document.querySelector('[data-timeline-node="portrait"]');
+      const portraitRect = portraitEl?.getBoundingClientRect();
+      const portraitAnchor =
+        portraitRect && portraitRect.width > 0
+          ? {
+              x: portraitRect.left + portraitRect.width / 2,
+              y: portraitRect.top + portraitRect.height * 0.3 + window.scrollY - top,
+            }
+          : null;
+
       // Straight down, one right-angle jog over to the Proof centerline, straight
       // down again — no diagonal.
       setGeometry({
@@ -60,7 +83,11 @@ export function TimelineBridge() {
         height: proofBottom,
         width,
         jogY,
+        fromX,
+        toX,
+        proofBottom,
         d: `M ${fromX} 0 L ${fromX} ${jogY} L ${toX} ${jogY} L ${toX} ${proofBottom}`,
+        portraitAnchor,
       });
     };
 
@@ -77,32 +104,20 @@ export function TimelineBridge() {
 
   useGSAP(
     () => {
-      if (!geometry || !pathRef.current || !svgRef.current) return;
-      const path = pathRef.current;
-      const length = path.getTotalLength();
-
-      if (reducedMotion) {
-        gsap.set(path, { strokeDasharray: length, strokeDashoffset: 0 });
-        return;
-      }
-
-      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-      gsap.to(path, {
-        strokeDashoffset: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: svgRef.current,
-          start: "top 85%",
-          end: "bottom 70%",
-          scrub: true,
+      if (!geometry || !pathRef.current || !svgRef.current || !pandaGroupRef.current) return;
+      const heroSection = document.querySelector('[data-timeline-node="portrait"]')?.closest("section") ?? null;
+      const heroPortrait = document.querySelector<HTMLElement>("[data-hero-portrait]");
+      return buildTimelineReveal(
+        {
+          svg: svgRef.current,
+          path: pathRef.current,
+          pandaGroup: pandaGroupRef.current,
+          heroSection,
+          heroPortrait,
         },
-      });
-
-      return () => {
-        ScrollTrigger.getAll().forEach((trigger) => {
-          if (trigger.trigger === svgRef.current) trigger.kill();
-        });
-      };
+        geometry,
+        reducedMotion,
+      );
     },
     { dependencies: [geometry, reducedMotion], revertOnUpdate: true },
   );
@@ -123,7 +138,7 @@ export function TimelineBridge() {
       ref={svgRef}
       aria-hidden
       className="pointer-events-none absolute left-0 hidden sm:block"
-      style={{ top, height, width }}
+      style={{ top, height, width, overflow: "visible" }}
     >
       <defs>
         <linearGradient
@@ -149,6 +164,9 @@ export function TimelineBridge() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <g ref={pandaGroupRef} style={{ color: "var(--accent)" }}>
+        <FoxIcon />
+      </g>
     </svg>
   );
 }
