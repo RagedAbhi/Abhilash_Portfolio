@@ -6,21 +6,17 @@
 // so there is deliberately no API-route proxy here. Consequences worth
 // remembering: the access key below is public by design ("not a secret API
 // key"), so anyone can post to Web3Forms with it and skip this file's checks.
-// Everything here is therefore UX plus a cheap bot filter; the enforcement
-// that actually matters (hCaptcha verification, spam filtering, rate limiting)
-// happens on Web3Forms' side.
+// Everything here is therefore UX plus a cheap bot filter (the honeypot); the
+// enforcement that actually matters (spam filtering, per-IP rate limiting)
+// happens on Web3Forms' side. There is deliberately no captcha: if hCaptcha is
+// ever enabled for the form in the Web3Forms dashboard, submissions without a
+// token would be rejected, so it has to stay off unless a widget is added back.
 
 export const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
-
-// Web3Forms' own shared hCaptcha sitekey for free-plan forms (from their docs).
-// hCaptcha must also be switched on for the form in the Web3Forms dashboard,
-// otherwise the token we send is simply ignored.
-export const WEB3FORMS_HCAPTCHA_SITEKEY = "50b2fe65-b00b-4b9e-ad62-3ba471098be2";
 
 // Must be referenced literally — Next only inlines `process.env.NEXT_PUBLIC_*`
 // into the browser bundle when it can see the exact expression.
 const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-export const isContactFormConfigured = Boolean(ACCESS_KEY);
 
 export const CONTACT_LIMITS = {
   nameMin: 2,
@@ -108,10 +104,7 @@ export function validateContact(fields: ContactFields): ContactErrors {
   return errors;
 }
 
-export async function submitContact(
-  fields: ContactFields,
-  captchaToken: string | null,
-): Promise<SubmitResult> {
+export async function submitContact(fields: ContactFields): Promise<SubmitResult> {
   if (!ACCESS_KEY) return { ok: false, reason: "unconfigured" };
 
   const name = sanitizeSingleLine(fields.name);
@@ -138,7 +131,6 @@ export async function submitContact(
         replyto: email,
         message,
         botcheck: false,
-        ...(captchaToken ? { "h-captcha-response": captchaToken } : {}),
       }),
     });
 

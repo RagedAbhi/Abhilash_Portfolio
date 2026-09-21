@@ -10,18 +10,25 @@ interface HeroRefs {
   headline: HTMLElement;
   subtext: HTMLElement;
   portrait: HTMLElement;
+  /** Inner wrapper of `portrait`, owned solely by the load entrance. The outer
+   * `portrait` element's x/y/scale/opacity belong to TimelineBridge's scroll
+   * flight (and its yPercent to the parallax below) — animating the entrance
+   * on the same element made two writers fight over opacity and y, so a reload
+   * deep in the page left the portrait faded back IN at its end-of-flight
+   * position, floating over the hero text on the way back up. */
+  portraitInner: HTMLElement;
   scrollCue: HTMLElement;
   glowWrapper: HTMLElement;
   glow: HTMLElement;
 }
 
 export function setHeroInitialState(
-  { background, headline, subtext, portrait, scrollCue }: HeroRefs,
+  { background, headline, subtext, portraitInner, scrollCue }: HeroRefs,
   reducedMotion: boolean,
 ) {
   gsap.set(background, { clipPath: reducedMotion ? "inset(0% 0 0 0)" : "inset(100% 0 0 0)" });
   gsap.set(subtext, { autoAlpha: 0, y: 24 });
-  gsap.set(portrait, { autoAlpha: 0, y: 24 });
+  gsap.set(portraitInner, { autoAlpha: 0, y: 24 });
   gsap.set(scrollCue, { autoAlpha: 0, y: 10 });
   if (reducedMotion) {
     gsap.set(headline, { autoAlpha: 0 });
@@ -29,7 +36,7 @@ export function setHeroInitialState(
 }
 
 export function playHeroEntrance(
-  { background, headline, subtext, portrait, scrollCue }: HeroRefs,
+  { background, headline, subtext, portraitInner, scrollCue }: HeroRefs,
   reducedMotion: boolean,
 ) {
   if (reducedMotion) {
@@ -37,7 +44,7 @@ export function playHeroEntrance(
     tl.set(background, { clipPath: "inset(0% 0 0 0)" });
     tl.to(headline, { autoAlpha: 1, duration: 0.6 });
     tl.to(subtext, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
-    tl.to(portrait, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
+    tl.to(portraitInner, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
     tl.to(scrollCue, { autoAlpha: 1, y: 0, duration: 0.6 }, "<");
     return { timeline: tl, revert: () => {} };
   }
@@ -54,7 +61,7 @@ export function playHeroEntrance(
   master.add(buildClipReveal(background, { direction: "up", duration: 1.3, easeName: ease.exit }), 0);
   master.add(splitTl, 0.2);
   master.to(subtext, { autoAlpha: 1, y: 0, duration: 0.8, ease: ease.standard }, "-=0.4");
-  master.to(portrait, { autoAlpha: 1, y: 0, duration: 0.8, ease: ease.standard }, "<");
+  master.to(portraitInner, { autoAlpha: 1, y: 0, duration: 0.8, ease: ease.standard }, "<");
   master.to(scrollCue, { autoAlpha: 1, y: 0, duration: 0.6, ease: ease.standard }, "-=0.3");
 
   return { timeline: master, revert };

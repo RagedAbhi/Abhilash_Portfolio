@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useSiteStore } from "@/lib/store";
 import type { SiteMeta, FunFact } from "@/lib/keystatic/content";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { DownloadIcon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import {
   CONTACT_LIMITS,
-  WEB3FORMS_HCAPTCHA_SITEKEY,
-  isContactFormConfigured,
   submitContact,
   validateContact,
   type ContactErrors,
@@ -53,21 +49,14 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
   const emailRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
   const honeypotRef = useRef<HTMLInputElement>(null);
-  const captchaRef = useRef<HCaptcha>(null);
   const submittingRef = useRef(false);
   const cooldownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reducedMotion = useReducedMotion();
-  const theme = useSiteStore((state) => state.theme);
 
   const [form, setForm] = useState<ContactFields>(EMPTY_FORM);
   const [errors, setErrors] = useState<ContactErrors>({});
   const [status, setStatus] = useState<FormStatus>("idle");
   const [notice, setNotice] = useState<string | null>(null);
-  // hCaptcha is a third-party script, so its widget is only mounted once the
-  // visitor actually starts using the form — most visitors never do.
-  const [captchaActive, setCaptchaActive] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const [captchaError, setCaptchaError] = useState<string | null>(null);
 
   useEffect(() => {
     const cooldown = cooldownRef;
@@ -105,17 +94,11 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
 
   const fieldRefs = { name: nameRef, email: emailRef, message: messageRef };
 
-  const resetCaptcha = () => {
-    captchaRef.current?.resetCaptcha();
-    setCaptchaToken(null);
-  };
-
   const showSuccess = () => {
     setForm(EMPTY_FORM);
     setErrors({});
     setStatus("sent");
     setNotice(SUCCESS_MESSAGE);
-    resetCaptcha();
     if (cooldownRef.current) clearTimeout(cooldownRef.current);
     cooldownRef.current = setTimeout(() => {
       setStatus("idle");
@@ -163,26 +146,17 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
       return;
     }
 
-    if (isContactFormConfigured && !captchaToken) {
-      setCaptchaActive(true);
-      setCaptchaError("Please complete the captcha.");
-      return;
-    }
-    setCaptchaError(null);
-
     submittingRef.current = true;
     setStatus("sending");
     setNotice(null);
 
-    const result = await submitContact(form, captchaToken);
+    const result = await submitContact(form);
     submittingRef.current = false;
 
     if (result.ok) {
       showSuccess();
       return;
     }
-    // A captcha token is single-use — whatever went wrong, a retry needs a fresh one.
-    resetCaptcha();
     setStatus("error");
     setNotice(FAILURE_MESSAGES[result.reason]);
   };
@@ -272,7 +246,6 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          onFocus={() => setCaptchaActive(true)}
           noValidate
           className="flex w-full max-w-md flex-col gap-5"
         >
@@ -357,39 +330,6 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
                 </p>
               )}
             </label>
-            {isContactFormConfigured && (
-              <div className="relative">
-                {/* Fixed-size slot so the widget loading in never shifts the layout. */}
-                <div
-                  className={cn(
-                    "flex h-[78px] w-full max-w-[303px] items-center justify-center overflow-hidden rounded-md",
-                    !captchaActive &&
-                      "border border-dashed border-fg/15 font-mono text-[10px] uppercase tracking-widest text-fg-muted/60",
-                  )}
-                >
-                  {captchaActive ? (
-                    <HCaptcha
-                      ref={captchaRef}
-                      sitekey={WEB3FORMS_HCAPTCHA_SITEKEY}
-                      theme={theme}
-                      reCaptchaCompat={false}
-                      onVerify={(token) => {
-                        setCaptchaToken(token);
-                        setCaptchaError(null);
-                      }}
-                      onExpire={() => setCaptchaToken(null)}
-                      onError={() => {
-                        setCaptchaToken(null);
-                        setCaptchaError("The captcha couldn't load. Please refresh the page and try again.");
-                      }}
-                    />
-                  ) : (
-                    "Spam check loads here"
-                  )}
-                </div>
-                {captchaError && <p className={errorClass}>{captchaError}</p>}
-              </div>
-            )}
             <button
               type="submit"
               disabled={status === "sending" || status === "sent"}

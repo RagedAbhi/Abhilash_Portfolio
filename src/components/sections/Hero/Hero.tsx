@@ -27,6 +27,7 @@ export function Hero({ site }: HeroProps) {
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subtextRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
+  const portraitInnerRef = useRef<HTMLDivElement>(null);
   const scrollCueRef = useRef<HTMLAnchorElement>(null);
   const reducedMotion = useReducedMotion();
   const loadingComplete = useSiteStore((state) => state.loadingComplete);
@@ -41,6 +42,7 @@ export function Hero({ site }: HeroProps) {
         !headlineRef.current ||
         !subtextRef.current ||
         !portraitRef.current ||
+        !portraitInnerRef.current ||
         !scrollCueRef.current
       ) {
         return;
@@ -53,6 +55,7 @@ export function Hero({ site }: HeroProps) {
         headline: headlineRef.current,
         subtext: subtextRef.current,
         portrait: portraitRef.current,
+        portraitInner: portraitInnerRef.current,
         scrollCue: scrollCueRef.current,
       };
       setHeroInitialState(refs, reducedMotion);
@@ -73,6 +76,7 @@ export function Hero({ site }: HeroProps) {
         !headlineRef.current ||
         !subtextRef.current ||
         !portraitRef.current ||
+        !portraitInnerRef.current ||
         !scrollCueRef.current
       ) {
         return;
@@ -85,6 +89,7 @@ export function Hero({ site }: HeroProps) {
         headline: headlineRef.current,
         subtext: subtextRef.current,
         portrait: portraitRef.current,
+        portraitInner: portraitInnerRef.current,
         scrollCue: scrollCueRef.current,
       };
       const { revert } = playHeroEntrance(refs, reducedMotion);
@@ -175,16 +180,20 @@ export function Hero({ site }: HeroProps) {
         className="pointer-events-none absolute bottom-0 hidden h-[92vh] sm:block"
         style={{ width: "48vw", right: "-6vw" }}
       >
-        <div className="absolute inset-0 scale-150 rounded-full bg-accent/35 blur-[110px]" />
-        {site.portrait.src && (
-          <Image
-            src={site.portrait.src}
-            alt={site.portrait.alt}
-            fill
-            sizes="48vw"
-            className="object-contain object-bottom"
-          />
-        )}
+        {/* Load-entrance target only — see portraitInner in Hero.animations.ts.
+            The outer box above stays reserved for TimelineBridge's scroll flight. */}
+        <div ref={portraitInnerRef} className="absolute inset-0">
+          <div className="absolute inset-0 scale-150 rounded-full bg-accent/35 blur-[110px]" />
+          {site.portrait.src && (
+            <Image
+              src={site.portrait.src}
+              alt={site.portrait.alt}
+              fill
+              sizes="48vw"
+              className="object-contain object-bottom"
+            />
+          )}
+        </div>
       </div>
     </section>
   );
