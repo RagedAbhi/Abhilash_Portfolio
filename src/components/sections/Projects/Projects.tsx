@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { Project } from "@/lib/keystatic/content";
 import { buildProjectsReveal } from "./Projects.animations";
 import { cn } from "@/lib/utils";
-import { ArrowLeftIcon, ArrowRightIcon, ExternalLinkIcon, GitHubIcon } from "@/components/ui/icons";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/ui/icons";
 
 const coverAccents = ["--accent-arrival", "--accent-formation", "--accent-proof", "--accent-invitation"];
 
@@ -22,6 +22,7 @@ export function Projects({ projects }: { projects: Project[] }) {
   const descRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
+  const prevIndexRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [expanded, setExpanded] = useState(false);
@@ -50,6 +51,14 @@ export function Projects({ projects }: { projects: Project[] }) {
   useGSAP(
     () => {
       if (!rowRef.current) return;
+      // The fox hops to the index number's live position, which can shift a
+      // few px between projects (their text columns differ in height) — so it
+      // has to hop only once the new project's layout is committed, not at
+      // click time.
+      if (prevIndexRef.current !== activeIndex) {
+        prevIndexRef.current = activeIndex;
+        window.dispatchEvent(new Event("fox:project-hop"));
+      }
       if (reducedMotion) {
         gsap.set(rowRef.current, { autoAlpha: 1, x: 0 });
         return;
@@ -65,7 +74,6 @@ export function Projects({ projects }: { projects: Project[] }) {
 
   const goTo = (nextIndex: number, dir: number) => {
     setExpanded(false);
-    window.dispatchEvent(new Event("fox:project-hop"));
     if (!rowRef.current || reducedMotion) {
       setDirection(dir);
       setActiveIndex(nextIndex);
@@ -113,38 +121,37 @@ export function Projects({ projects }: { projects: Project[] }) {
       <span className="mb-16 block font-mono text-lg uppercase tracking-widest text-accent sm:text-2xl">
         04 — Projects
       </span>
-      <div ref={wrapperRef} className="w-full mx-auto max-w-6xl">
+      <div ref={wrapperRef} className="w-full mx-auto max-w-7xl">
         <div ref={rowRef} className="flex flex-col gap-8 md:flex-row md:items-center md:gap-16">
-          <div ref={textColRef} className="flex flex-1 flex-col gap-3">
-            <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
-              {project.year ? `${project.year} — ${project.role}` : project.role}
-            </span>
+          <div ref={textColRef} className="flex flex-1 flex-col gap-3 lg:flex-[38_1_0%]">
             <h3 className="font-display text-4xl text-fg sm:text-6xl">{project.title}</h3>
+            {project.category && (
+              <p className="font-mono text-xs uppercase tracking-widest text-accent sm:text-sm">
+                {project.category}
+              </p>
+            )}
             <p className="max-w-md text-sm leading-relaxed text-fg-muted sm:text-base">
               {project.summary}
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {project.stack.map((tech) => (
-                <span
-                  key={tech}
-                  className="rounded-full border border-fg/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-fg-muted"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
+            {project.stack.length > 0 && (
+              <p className="font-mono text-xs uppercase tracking-widest text-fg/60">
+                {project.stack.join(" · ")}
+              </p>
+            )}
             {(project.link || project.repo) && (
-              <div className="flex flex-wrap gap-4">
+              <div className="mt-1 flex flex-wrap gap-6">
                 {project.link && (
                   <a
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-cursor="hover"
-                    className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
+                    data-cursor="accent"
+                    className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-fg transition-colors hover:text-accent sm:text-sm"
                   >
-                    <ExternalLinkIcon className="h-3 w-3" />
-                    Live Site
+                    Live
+                    <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+                      →
+                    </span>
                   </a>
                 )}
                 {project.repo && (
@@ -152,11 +159,13 @@ export function Projects({ projects }: { projects: Project[] }) {
                     href={project.repo}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-cursor="hover"
-                    className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
+                    data-cursor="accent"
+                    className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-fg transition-colors hover:text-accent sm:text-sm"
                   >
-                    <GitHubIcon className="h-3 w-3" />
                     Source
+                    <span aria-hidden className="transition-transform duration-300 group-hover:translate-x-1">
+                      →
+                    </span>
                   </a>
                 )}
               </div>
@@ -164,9 +173,9 @@ export function Projects({ projects }: { projects: Project[] }) {
             {project.description && (
               <button
                 type="button"
-                data-cursor="hover"
                 onClick={toggleDescription}
                 aria-expanded={expanded}
+                data-cursor="accent"
                 className="flex w-fit items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-accent transition-colors hover:text-fg"
               >
                 <span
@@ -186,7 +195,7 @@ export function Projects({ projects }: { projects: Project[] }) {
             </div>
           </div>
 
-          <div ref={imageColRef} className="w-full flex-1">
+          <div ref={imageColRef} className="w-full flex-1 lg:flex-[62_1_0%]">
             {project.coverImage.src ? (
               (() => {
                 const cardClass =
@@ -207,7 +216,7 @@ export function Projects({ projects }: { projects: Project[] }) {
                     src={project.coverImage.src}
                     alt={project.coverImage.alt}
                     fill
-                    sizes="(min-width: 768px) 45vw, 100vw"
+                    sizes="(min-width: 1024px) 60vw, (min-width: 768px) 45vw, 100vw"
                     className="object-contain"
                   />
                 );
@@ -216,8 +225,8 @@ export function Projects({ projects }: { projects: Project[] }) {
                     href={project.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-cursor="hover"
                     aria-label={`Open ${project.title} live site`}
+                    data-cursor="accent"
                     className={cardClass}
                     style={cardStyle}
                   >
@@ -248,7 +257,7 @@ export function Projects({ projects }: { projects: Project[] }) {
               type="button"
               onClick={goPrev}
               aria-label="Previous project"
-              data-cursor="hover"
+              data-cursor="accent"
               className="flex h-10 w-10 items-center justify-center rounded-full border border-fg/10 text-fg transition-colors hover:bg-fg/10"
             >
               <ArrowLeftIcon className="h-4 w-4" />
@@ -263,7 +272,7 @@ export function Projects({ projects }: { projects: Project[] }) {
               type="button"
               onClick={goNext}
               aria-label="Next project"
-              data-cursor="hover"
+              data-cursor="accent"
               className="flex h-10 w-10 items-center justify-center rounded-full border border-fg/10 text-fg transition-colors hover:bg-fg/10"
             >
               <ArrowRightIcon className="h-4 w-4" />

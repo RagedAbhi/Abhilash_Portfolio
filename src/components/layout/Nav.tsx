@@ -99,46 +99,57 @@ export function Nav({ name, resumeUrl }: { name: string; resumeUrl?: string }) {
 
   return (
     <>
+      {/* A translucent blurred backdrop + hairline border, so the links stay
+          legible over whatever is scrolling underneath (photo, glows, text) —
+          without it the muted link text just floated over page content. Drops
+          away while the mobile menu is open, since that panel supplies its own
+          solid background. */}
       <header
         ref={navRef}
-        className="fixed inset-x-0 top-0 z-[60] flex items-center justify-between px-6 py-6 sm:px-10"
+        className={`fixed inset-x-0 top-0 z-[60] flex items-center justify-between border-b px-6 py-4 transition-colors duration-300 sm:px-10 ${
+          menuOpen
+            ? "border-transparent bg-transparent"
+            : "border-fg/10 bg-bg/75 backdrop-blur-xl"
+        }`}
       >
         <a
           href="#arrival"
           data-cursor="link"
           onClick={scrollToSection("arrival")}
-          className="relative z-10 font-mono text-xs uppercase tracking-widest text-fg"
+          className="relative z-10 font-mono text-[13px] uppercase tracking-widest text-fg"
         >
           {name}
         </a>
         <div className="hidden items-center gap-8 sm:flex">
-          <nav className="flex gap-8">
+          <nav className="flex gap-7">
             {chapters.map((chapter, index) => (
               <a
                 key={chapter.id}
                 href={`#${chapter.id}`}
                 data-cursor="link"
                 onClick={scrollToSection(chapter.id)}
-                className={`font-mono text-xs uppercase tracking-widest transition-colors ${
-                  activeSection === chapter.id ? "text-accent" : "text-fg-muted hover:text-fg"
+                className={`font-mono text-[13px] uppercase tracking-widest transition-colors ${
+                  activeSection === chapter.id ? "text-accent" : "text-fg/70 hover:text-fg"
                 }`}
               >
                 {String(index + 1).padStart(2, "0")} {chapter.label}
               </a>
             ))}
           </nav>
-          {resumeUrl && (
-            <a
-              href={resumeUrl}
-              download
-              data-cursor="link"
-              className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-fg-muted transition-colors hover:text-fg"
-            >
-              <DownloadIcon className="h-3.5 w-3.5" />
-              Resume
-            </a>
-          )}
-          <ThemeToggle />
+          <div className="flex items-center gap-4">
+            {resumeUrl && (
+              <a
+                href={resumeUrl}
+                download
+                data-cursor="link"
+                className="flex items-center gap-2 rounded-full bg-accent px-4 py-2 font-mono text-[13px] uppercase tracking-widest text-bg transition-all duration-300 hover:scale-[1.04] hover:opacity-90"
+              >
+                <DownloadIcon className="h-3.5 w-3.5" />
+                Resume
+              </a>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
 
         <button
@@ -191,7 +202,7 @@ export function Nav({ name, resumeUrl }: { name: string; resumeUrl?: string }) {
             href={resumeUrl}
             download
             onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-widest text-fg-muted"
+            className="mt-2 flex w-fit items-center gap-2 rounded-full bg-accent px-5 py-3 font-mono text-xs uppercase tracking-widest text-bg"
           >
             <DownloadIcon className="h-3.5 w-3.5" />
             Download Resume

@@ -25,9 +25,12 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggleTheme}
       data-cursor="link"
       aria-label={displayedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className={cn("flex h-4 w-4 items-center justify-center text-fg-muted transition-colors hover:text-fg", className)}
+      className={cn(
+        "flex h-9 w-9 items-center justify-center rounded-full border border-fg/15 text-fg/70 transition-colors hover:border-fg/30 hover:text-fg",
+        className,
+      )}
     >
-      {displayedTheme === "dark" ? <SunIcon className="h-full w-full" /> : <MoonIcon className="h-full w-full" />}
+      {displayedTheme === "dark" ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
     </button>
   );
 }

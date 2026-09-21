@@ -1,5 +1,6 @@
 title: Cuerates
 role: Personal Project
+category: Full Stack · Social
 summary: >-
   A social platform for discovering, tracking, and sharing movies and shows with
   friends
@@ -10,8 +11,8 @@ description: >-
 stack:
   - React
   - Node.js
-  - MongoDB
   - Express.js
+  - MongoDB
 coverImage: /images/projects/cuerates/coverImage.png
 link: https://cuerates.vercel.app
 repo: https://github.com/RagedAbhi/Cuerates

@@ -17,6 +17,9 @@ interface VariantStyle {
 const variantStyles: Record<CursorVariant, VariantStyle> = {
   default: { dotScale: 1, ringScale: 0.2, ringOpacity: 0.2, label: null },
   link: { dotScale: 0.4, ringScale: 0.55, ringOpacity: 1, label: null },
+  // Accent-coloured outline ring + accent dot — an interactive cue that
+  // doesn't swell into a big filled circle over the content underneath.
+  accent: { dotScale: 1, ringScale: 0.5, ringOpacity: 1, label: null },
   hover: { dotScale: 0, ringScale: 0.85, ringOpacity: 1, label: null },
   drag: { dotScale: 0, ringScale: 1, ringOpacity: 1, label: "Drag" },
 };
@@ -86,7 +89,9 @@ export function CustomCursor() {
       const target = (event.target as HTMLElement)?.closest("[data-cursor]");
       const variant = target?.getAttribute("data-cursor");
       setCursorVariant(
-        variant === "link" || variant === "hover" || variant === "drag" ? variant : "default",
+        variant === "link" || variant === "accent" || variant === "hover" || variant === "drag"
+          ? variant
+          : "default",
       );
     };
 
@@ -125,8 +130,12 @@ export function CustomCursor() {
         className={cn(
           "absolute left-0 top-0 rounded-full border transition-colors duration-200",
           cursorVariant === "link" && "border-fg bg-transparent",
+          cursorVariant === "accent" && "border-accent bg-accent/10",
           cursorVariant === "hover" && "border-transparent bg-accent",
-          cursorVariant !== "link" && cursorVariant !== "hover" && "border-transparent bg-fg",
+          cursorVariant !== "link" &&
+            cursorVariant !== "accent" &&
+            cursorVariant !== "hover" &&
+            "border-transparent bg-fg",
         )}
         style={{ width: 64, height: 64 }}
       >
@@ -137,7 +146,10 @@ export function CustomCursor() {
       </div>
       <div
         ref={dotRef}
-        className="absolute left-0 top-0 rounded-full bg-fg"
+        className={cn(
+          "absolute left-0 top-0 rounded-full transition-colors duration-200",
+          cursorVariant === "accent" ? "bg-accent" : "bg-fg",
+        )}
         style={{ width: 8, height: 8 }}
       />
     </div>

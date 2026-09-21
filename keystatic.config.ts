@@ -19,7 +19,7 @@ export default config({
         name: fields.text({ label: "Name" }),
         role: fields.text({ label: "Role" }),
         tagline: fields.text({ label: "Tagline (Hero headline)", multiline: true }),
-        subline: fields.text({ label: "Subline (plain second sentence)", multiline: true }),
+        subline: fields.text({ label: "Hero one-liner (shown under the role)" }),
         email: fields.text({ label: "Email" }),
         socials: fields.array(
           fields.object({
@@ -89,6 +89,10 @@ export default config({
         title: fields.slug({ name: { label: "Title" } }),
         year: fields.integer({ label: "Year" }),
         role: fields.text({ label: "Role" }),
+        category: fields.text({
+          label: "Category line (e.g. Full Stack · Social)",
+          validation: { isRequired: false },
+        }),
         summary: fields.text({ label: "Summary (one line)", multiline: true }),
         description: fields.text({ label: "Description (longer)", multiline: true }),
         stack: fields.array(fields.text({ label: "Technology" }), {

@@ -92,6 +92,13 @@ export function ThemeShift() {
         const rect = el.getBoundingClientRect();
         if (rect.top <= activationLine && rect.bottom >= activationLine) return chapters[i];
       }
+      // Past the end of the last chapter (the footer sits below it, and on a
+      // short/tall-footer viewport its bottom can rise above the activation
+      // line at the very bottom of the page) — the last chapter stays active
+      // rather than falling back to the first one.
+      const last = chapters[chapters.length - 1];
+      const lastEl = document.getElementById(last.id);
+      if (lastEl && lastEl.getBoundingClientRect().bottom < activationLine) return last;
       return chapters[0];
     };
     const onBoundaryCross = () => activate(resolveActiveChapter());

@@ -46,6 +46,7 @@ export interface Project {
   title: string;
   year?: number;
   role: string;
+  category?: string;
   summary: string;
   description: string;
   stack: string[];
@@ -136,6 +137,7 @@ export async function getProjects(): Promise<Project[]> {
         title: entry.title,
         year: entry.year ?? undefined,
         role: entry.role,
+        category: entry.category || undefined,
         summary: entry.summary,
         description: entry.description,
         stack: [...entry.stack],

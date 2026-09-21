@@ -125,9 +125,14 @@ export function Hero({ site }: HeroProps) {
           {site.name}
         </h1>
         <div ref={subtextRef} className="flex max-w-2xl flex-col gap-8">
-          <p className="font-mono text-sm uppercase tracking-widest text-fg-muted sm:text-base">
-            {site.role}
-          </p>
+          <div className="flex flex-col gap-3">
+            <p className="font-mono text-sm uppercase tracking-widest text-fg-muted sm:text-base">
+              {site.role}
+            </p>
+            {site.subline && (
+              <p className="max-w-lg text-lg leading-snug text-fg/80 sm:text-xl">{site.subline}</p>
+            )}
+          </div>
           <SocialLinks socials={site.socials} />
         </div>
       </div>

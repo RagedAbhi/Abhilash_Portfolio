@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type CursorVariant = "default" | "link" | "hover" | "drag";
+export type CursorVariant = "default" | "link" | "accent" | "hover" | "drag";
 export type Theme = "dark" | "light";
 
 interface SiteState {

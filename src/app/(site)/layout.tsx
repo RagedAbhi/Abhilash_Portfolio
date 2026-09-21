@@ -6,6 +6,7 @@ import { NoiseOverlay } from "@/components/layout/NoiseOverlay";
 import { CustomCursor } from "@/components/layout/CustomCursor";
 import { LoadingScreen } from "@/components/layout/LoadingScreen";
 import { Nav } from "@/components/layout/Nav";
+import { Footer } from "@/components/layout/Footer";
 import { ProgressIndicator } from "@/components/layout/ProgressIndicator";
 import { ThemeShift } from "@/components/layout/ThemeShift";
 import { getSiteSettings } from "@/lib/keystatic/content";
@@ -65,6 +66,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <Nav name={site.name} resumeUrl={site.resumeUrl} />
           <ThemeShift />
           {children}
+          <Footer
+            name={site.name}
+            role={site.role}
+            socials={site.socials}
+            year={new Date().getFullYear()}
+          />
         </SmoothScrollProvider>
       </body>
     </html>
