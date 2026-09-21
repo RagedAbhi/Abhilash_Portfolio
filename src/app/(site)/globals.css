@@ -11,6 +11,7 @@
   --accent-proof: #ff6b4a;
   --accent-projects: #b48eff;
   --accent-invitation: #ffc857;
+  --danger: #f2696e;
 }
 
 :root[data-theme="light"] {
@@ -24,6 +25,7 @@
   --accent-proof: #d94f28;
   --accent-projects: #7c3aed;
   --accent-invitation: #b8790a;
+  --danger: #b3261e;
 }
 
 @theme inline {
@@ -31,6 +33,7 @@
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-accent: var(--accent);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
