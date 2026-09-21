@@ -82,12 +82,12 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
 
       <div className="relative flex flex-col justify-between gap-12 md:w-[42%]">
         <div>
-          <span className="font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+          <span className="font-mono text-lg uppercase tracking-widest text-accent sm:text-2xl">
             05 — Contact
           </span>
           <h2
             ref={headlineRef}
-            className="mt-6 max-w-md font-display text-4xl leading-[1.05] tracking-tight text-fg sm:text-6xl"
+            className="mt-6 max-w-md font-display text-5xl leading-[1.05] tracking-tight text-fg sm:text-7xl"
           >
             {site.contactHeadline}
           </h2>

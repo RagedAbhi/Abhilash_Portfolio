@@ -39,7 +39,7 @@ export function About({ beats: aboutBeats }: AboutProps) {
       ref={sectionRef}
       className="relative flex min-h-screen flex-col justify-center overflow-x-hidden px-6 py-20 sm:px-10"
     >
-      <span className="mb-10 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+      <span className="mb-10 block font-mono text-lg uppercase tracking-widest text-accent sm:text-2xl">
         02 — About
       </span>
       <div className="relative mx-auto w-full max-w-6xl">

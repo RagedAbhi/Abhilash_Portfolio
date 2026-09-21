@@ -110,7 +110,7 @@ export function Projects({ projects }: { projects: Project[] }) {
       id="projects"
       className="relative flex min-h-screen flex-col justify-center overflow-x-hidden px-6 py-24 sm:px-10"
     >
-      <span className="mb-16 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+      <span className="mb-16 block font-mono text-lg uppercase tracking-widest text-accent sm:text-2xl">
         04 — Projects
       </span>
       <div ref={wrapperRef} className="w-full mx-auto max-w-6xl">
@@ -119,7 +119,7 @@ export function Projects({ projects }: { projects: Project[] }) {
             <span className="font-mono text-xs uppercase tracking-widest text-fg-muted">
               {project.year ? `${project.year} — ${project.role}` : project.role}
             </span>
-            <h3 className="font-display text-3xl text-fg sm:text-5xl">{project.title}</h3>
+            <h3 className="font-display text-4xl text-fg sm:text-6xl">{project.title}</h3>
             <p className="max-w-md text-sm leading-relaxed text-fg-muted sm:text-base">
               {project.summary}
             </p>

@@ -120,7 +120,7 @@ export function Hero({ site }: HeroProps) {
       <div className="relative z-10 flex w-full flex-col gap-6 px-6 sm:px-10">
         <h1
           ref={headlineRef}
-          className="max-w-2xl text-balance font-display text-[13vw] font-medium leading-[0.92] tracking-tight text-fg sm:text-[7vw]"
+          className="max-w-2xl text-balance font-display text-[14vw] font-medium leading-[0.92] tracking-tight text-fg sm:text-[8vw]"
         >
           {site.name}
         </h1>
@@ -170,35 +170,15 @@ export function Hero({ site }: HeroProps) {
         className="pointer-events-none absolute bottom-0 hidden h-[92vh] sm:block"
         style={{ width: "48vw", right: "-6vw" }}
       >
-        <div className="absolute inset-0 scale-125 rounded-full bg-accent/20 blur-[100px]" />
+        <div className="absolute inset-0 scale-150 rounded-full bg-accent/35 blur-[110px]" />
         {site.portrait.src && (
-          <>
-            <Image
-              src={site.portrait.src}
-              alt={site.portrait.alt}
-              fill
-              sizes="48vw"
-              className="object-contain object-bottom grayscale"
-            />
-            {/* Duotone tint: a solid accent-colored layer, masked to the portrait's
-                own alpha shape so only the visible photo (not the transparent PNG
-                padding) is colorized, blended over the grayscale image above via
-                mix-blend-color. Uses the live --accent variable directly so it
-                stays in sync with the site's per-chapter/per-theme accent system. */}
-            <div
-              className="absolute inset-0 bg-accent opacity-40 mix-blend-color"
-              style={{
-                WebkitMaskImage: `url(${site.portrait.src})`,
-                maskImage: `url(${site.portrait.src})`,
-                WebkitMaskSize: "contain",
-                maskSize: "contain",
-                WebkitMaskPosition: "bottom",
-                maskPosition: "bottom",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-              }}
-            />
-          </>
+          <Image
+            src={site.portrait.src}
+            alt={site.portrait.alt}
+            fill
+            sizes="48vw"
+            className="object-contain object-bottom"
+          />
         )}
       </div>
     </section>

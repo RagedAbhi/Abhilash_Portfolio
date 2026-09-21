@@ -26,7 +26,7 @@ export function Experience({ entries: experience }: { entries: ExperienceEntry[]
 
   return (
     <div ref={sectionRef} className="relative overflow-x-hidden px-6 py-32 sm:px-10">
-      <span className="mb-16 block font-mono text-base uppercase tracking-widest text-accent sm:text-xl">
+      <span className="mb-16 block font-mono text-lg uppercase tracking-widest text-accent sm:text-2xl">
         03 — Experience
       </span>
       {/* Marked for TimelineBridge, which measures this box's edges to draw
@@ -47,7 +47,7 @@ export function Experience({ entries: experience }: { entries: ExperienceEntry[]
               <span className="block font-mono text-xs uppercase tracking-widest text-fg-muted">
                 {formatRange(entry.startDate, entry.endDate)}
               </span>
-              <h3 className="mt-3 font-display text-2xl text-fg sm:text-3xl">
+              <h3 className="mt-3 font-display text-3xl text-fg sm:text-4xl">
                 {entry.role} <span className="text-fg-muted">— {entry.company}</span>
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-fg-muted sm:text-base">

@@ -1,51 +1,33 @@
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ease } from "@/lib/animations/easing";
 
-// The small tilt each card sits at in the fan — applied via GSAP (not
-// inline/Tailwind transform classes) so GSAP "owns" the transform from the
-// start; mixing a plain CSS transform string with GSAP-driven tweens on the
-// same element lets GSAP's own transform cache silently clobber the CSS one
-// the first time it writes to that element.
-export const FAN_ROTATIONS = [-10, -2, 6];
-
-// Sized to read clearly above cards this small without dwarfing them.
+// Sized to read clearly above the widget without dwarfing it.
 const FOX_SCALE = 1.5;
 
 interface RevealRefs {
   stack: HTMLElement;
-  cards: HTMLElement[];
+  content: HTMLElement;
   foxGroup?: SVGGElement | null;
 }
 
-// Entrance (fade/scale/stagger in as the stack scrolls into view) plus a
-// slow, continuous idle sway on the whole cluster — the same "alive before
-// you touch it" idea as Contact's own glow `breathe` tween, so the cards
-// don't read as inert set-dressing before anyone clicks one. The fox (when
-// present) fades in alongside them and patrols back and forth above the
-// stack continuously, independent of the cards' own sway.
-export function buildFunFactCardsReveal({ stack, cards, foxGroup }: RevealRefs, reducedMotion: boolean) {
+// Entrance (fade/rise in as the widget scrolls into view) plus the fox
+// patrolling back and forth above it, continuously, independent of scroll —
+// shared by whichever design (pills/terminal) is currently active, since
+// both just hand in their own outer content wrapper as the fade target.
+export function buildFunFactsReveal({ stack, content, foxGroup }: RevealRefs, reducedMotion: boolean) {
   const foxBody = foxGroup?.querySelector<SVGGElement>("[data-fox-body]") ?? null;
   const foxTail = foxGroup?.querySelector<SVGGElement>("[data-fox-tail]") ?? null;
 
   if (reducedMotion) {
-    gsap.set(cards, { autoAlpha: 1, scale: 1, y: 0 });
-    cards.forEach((card, i) => gsap.set(card, { rotation: FAN_ROTATIONS[i] ?? 0 }));
+    gsap.set(content, { autoAlpha: 1, y: 0 });
     if (foxGroup) gsap.set(foxGroup, { autoAlpha: 1, scale: FOX_SCALE, x: 0 });
     return () => {};
   }
 
-  gsap.set(cards, { autoAlpha: 0, scale: 0.85, y: 20 });
-  cards.forEach((card, i) => gsap.set(card, { rotation: FAN_ROTATIONS[i] ?? 0 }));
+  gsap.set(content, { autoAlpha: 0, y: 16 });
 
   const tl = gsap.timeline();
-  tl.to(cards, {
-    autoAlpha: 1,
-    scale: 1,
-    y: 0,
-    duration: 0.6,
-    stagger: 0.1,
-    ease: ease.standard,
-  });
+  tl.to(content, { autoAlpha: 1, y: 0, duration: 0.6, ease: ease.standard });
 
   if (foxGroup) {
     // Only autoAlpha is entrance-driven — x is already being written
@@ -63,15 +45,6 @@ export function buildFunFactCardsReveal({ stack, cards, foxGroup }: RevealRefs, 
     animation: tl,
   });
 
-  const sway = gsap.to(stack, {
-    rotation: 1.5,
-    duration: 3.4,
-    ease: "sine.inOut",
-    yoyo: true,
-    repeat: -1,
-    transformOrigin: "50% 100%",
-  });
-
   let patrol: gsap.core.Timeline | null = null;
   let hoverBob: gsap.core.Tween | null = null;
   let bodyIdle: gsap.core.Tween | null = null;
@@ -81,7 +54,7 @@ export function buildFunFactCardsReveal({ stack, cards, foxGroup }: RevealRefs, 
     const stackWidth = stack.getBoundingClientRect().width;
     const patrolDistance = Math.max(50, stackWidth - 60);
 
-    // Back-and-forth pacing above the cards — the same fox silhouette used
+    // Back-and-forth pacing above the widget — the same fox silhouette used
     // everywhere else on the site, at its default fixed orientation the
     // whole time (no mirroring/rotation), matching how it's used elsewhere.
     patrol = gsap.timeline({ repeat: -1 });
@@ -117,7 +90,6 @@ export function buildFunFactCardsReveal({ stack, cards, foxGroup }: RevealRefs, 
 
   return () => {
     trigger.kill();
-    sway.kill();
     patrol?.kill();
     hoverBob?.kill();
     bodyIdle?.kill();
@@ -125,20 +97,15 @@ export function buildFunFactCardsReveal({ stack, cards, foxGroup }: RevealRefs, 
   };
 }
 
-// The 3D flip itself — a plain rotationY tween on the "flipper" element,
-// which sits inside a perspective-wrapped slot with two backface-hidden
-// faces (back design at rotateY(0), fact content pre-rotated to
-// rotateY(180deg) in its own static class) — the standard flip-card
-// technique. Kept as a tiny standalone function (not tied to the reveal
-// timeline above) since it fires per-card, per-click, independent of scroll.
-export function flipCard(flipper: HTMLElement, toFront: boolean, reducedMotion: boolean) {
-  if (reducedMotion) {
-    gsap.set(flipper, { rotationY: toFront ? 180 : 0 });
-    return;
+// Module-level (not defined inside a component) so the lint rule against
+// impure calls "during render" doesn't flag Math.random — a plain helper
+// only ever invoked from click handlers, never during render. Shared by
+// whichever design needs a "pick a different one than last time" draw.
+export function pickRandomFact(length: number, excludeIndex: number | null): number {
+  if (length <= 1) return 0;
+  let next = Math.floor(Math.random() * length);
+  while (next === excludeIndex) {
+    next = Math.floor(Math.random() * length);
   }
-  gsap.to(flipper, {
-    rotationY: toFront ? 180 : 0,
-    duration: 0.6,
-    ease: "back.out(1.6)",
-  });
+  return next;
 }
