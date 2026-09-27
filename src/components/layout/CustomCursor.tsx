@@ -8,26 +8,23 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
 
 interface VariantStyle {
-  dotScale: number;
-  ringScale: number;
-  ringOpacity: number;
-  label: string | null;
+  scale: number;
+  accent: boolean;
 }
 
+// A single small dot, no trailing ring — the dot itself is the only cursor
+// feedback; hovering something interactive just grows/tints it. Everything
+// else (link/button/card hover states) is left to the element itself, which
+// already has its own hover styling across the site.
 const variantStyles: Record<CursorVariant, VariantStyle> = {
-  default: { dotScale: 1, ringScale: 0.2, ringOpacity: 0.2, label: null },
-  link: { dotScale: 0.4, ringScale: 0.55, ringOpacity: 1, label: null },
-  // Accent-coloured outline ring + accent dot — an interactive cue that
-  // doesn't swell into a big filled circle over the content underneath.
-  accent: { dotScale: 1, ringScale: 0.5, ringOpacity: 1, label: null },
-  hover: { dotScale: 0, ringScale: 0.85, ringOpacity: 1, label: null },
-  drag: { dotScale: 0, ringScale: 1, ringOpacity: 1, label: "Drag" },
+  default: { scale: 1, accent: false },
+  link: { scale: 1.6, accent: false },
+  accent: { scale: 1.6, accent: true },
+  drag: { scale: 2.2, accent: true },
 };
 
 export function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLSpanElement>(null);
   const cursorVariant = useSiteStore((state) => state.cursorVariant);
   const setCursorVariant = useSiteStore((state) => state.setCursorVariant);
   const reducedMotion = useReducedMotion();
@@ -44,54 +41,32 @@ export function CustomCursor() {
     };
   }, [enabled]);
 
-  // useLayoutEffect (not useEffect) so the dot/ring are centered and scaled
-  // down to their resting size before the browser paints — otherwise they
-  // render for one frame at their raw, unstyled size (64px, full opacity,
-  // pinned to the page's top-left corner) before this ever runs, which
-  // shows up as a stray solid circle in that corner.
+  // useLayoutEffect (not useEffect) so the dot is centered and scaled down to
+  // its resting size before the browser paints — otherwise it renders for one
+  // frame at its raw, unstyled size (8px, pinned to the page's top-left
+  // corner) before this ever runs, which shows up as a stray dot in that corner.
   useLayoutEffect(() => {
-    if (!enabled || !dotRef.current || !ringRef.current) return;
-
-    const dot = dotRef.current;
-    const ring = ringRef.current;
-
-    // xPercent/yPercent self-center the elements on the cursor point; GSAP composes
-    // these with x/y/scale into one transform, so a plain CSS translate class here
-    // would get clobbered the moment a tween first touches the transform.
-    gsap.set(dot, { xPercent: -50, yPercent: -50, scale: variantStyles.default.dotScale });
-    gsap.set(ring, {
-      xPercent: -50,
-      yPercent: -50,
-      scale: variantStyles.default.ringScale,
-      opacity: variantStyles.default.ringOpacity,
-    });
+    if (!enabled || !dotRef.current) return;
+    gsap.set(dotRef.current, { xPercent: -50, yPercent: -50, scale: variantStyles.default.scale });
   }, [enabled]);
 
   useEffect(() => {
-    if (!enabled || !dotRef.current || !ringRef.current) return;
-
+    if (!enabled || !dotRef.current) return;
     const dot = dotRef.current;
-    const ring = ringRef.current;
 
     const moveDotX = gsap.quickTo(dot, "x", { duration: 0.15, ease: "power3" });
     const moveDotY = gsap.quickTo(dot, "y", { duration: 0.15, ease: "power3" });
-    const moveRingX = gsap.quickTo(ring, "x", { duration: 0.5, ease: "power3" });
-    const moveRingY = gsap.quickTo(ring, "y", { duration: 0.5, ease: "power3" });
 
     const onMove = (event: PointerEvent) => {
       moveDotX(event.clientX);
       moveDotY(event.clientY);
-      moveRingX(event.clientX);
-      moveRingY(event.clientY);
     };
 
     const onOver = (event: PointerEvent) => {
       const target = (event.target as HTMLElement)?.closest("[data-cursor]");
       const variant = target?.getAttribute("data-cursor");
       setCursorVariant(
-        variant === "link" || variant === "accent" || variant === "hover" || variant === "drag"
-          ? variant
-          : "default",
+        variant === "link" || variant === "accent" || variant === "drag" ? variant : "default",
       );
     };
 
@@ -105,53 +80,25 @@ export function CustomCursor() {
   }, [enabled, setCursorVariant]);
 
   useEffect(() => {
-    if (!enabled || !dotRef.current || !ringRef.current) return;
-    const style = variantStyles[cursorVariant];
-
-    gsap.to(dotRef.current, { scale: style.dotScale, duration: 0.25, ease: "power3.out" });
-    gsap.to(ringRef.current, {
-      scale: style.ringScale,
-      opacity: style.ringOpacity,
+    if (!enabled || !dotRef.current) return;
+    gsap.to(dotRef.current, {
+      scale: variantStyles[cursorVariant].scale,
       duration: 0.25,
       ease: "power3.out",
     });
-    if (labelRef.current) {
-      if (style.label) labelRef.current.textContent = style.label;
-      gsap.to(labelRef.current, { autoAlpha: style.label ? 1 : 0, duration: 0.2 });
-    }
   }, [cursorVariant, enabled]);
 
   if (!enabled) return null;
 
   return (
-    <div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[90]">
-      <div
-        ref={ringRef}
-        className={cn(
-          "absolute left-0 top-0 rounded-full border transition-colors duration-200",
-          cursorVariant === "link" && "border-fg bg-transparent",
-          cursorVariant === "accent" && "border-accent bg-accent/10",
-          cursorVariant === "hover" && "border-transparent bg-accent",
-          cursorVariant !== "link" &&
-            cursorVariant !== "accent" &&
-            cursorVariant !== "hover" &&
-            "border-transparent bg-fg",
-        )}
-        style={{ width: 64, height: 64 }}
-      >
-        <span
-          ref={labelRef}
-          className="absolute inset-0 flex items-center justify-center font-mono text-[10px] uppercase tracking-widest text-bg opacity-0"
-        />
-      </div>
-      <div
-        ref={dotRef}
-        className={cn(
-          "absolute left-0 top-0 rounded-full transition-colors duration-200",
-          cursorVariant === "accent" ? "bg-accent" : "bg-fg",
-        )}
-        style={{ width: 8, height: 8 }}
-      />
-    </div>
+    <div
+      ref={dotRef}
+      aria-hidden
+      className={cn(
+        "pointer-events-none fixed left-0 top-0 z-[90] rounded-full transition-colors duration-200",
+        variantStyles[cursorVariant].accent ? "bg-accent" : "bg-fg",
+      )}
+      style={{ width: 8, height: 8 }}
+    />
   );
 }

@@ -31,7 +31,7 @@ export function FunFactCards({ facts }: { facts: FunFact[] }) {
   if (facts.length === 0) return null;
 
   return (
-    <div ref={stackRef} className="relative hidden sm:block">
+    <div ref={stackRef} className="relative">
       {/* Hovers back and forth above the widget — see FunFactCards.animations.ts
           for the patrol/hover tweens; overflow-visible since the fox's own
           head/tail bleed past this small svg's own box at this scale. */}

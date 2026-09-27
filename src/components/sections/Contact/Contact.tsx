@@ -391,7 +391,11 @@ export function Contact({ site, funFacts }: { site: SiteMeta; funFacts: FunFact[
       </div>
 
       {funFacts.length > 0 && (
-        <div className="absolute bottom-6 right-6 z-10 sm:bottom-10 sm:right-10">
+        // Below `sm` this sits in normal flow, centered under the form —
+        // the corner-pinned absolute position (kept for sm and up, unchanged
+        // from before) has no room to itself on a narrow screen and used to
+        // land directly on top of the Send Message button.
+        <div className="relative z-10 mt-14 flex justify-center sm:absolute sm:bottom-10 sm:right-10 sm:mt-0 sm:block sm:justify-start">
           <FunFactCards facts={funFacts} />
         </div>
       )}
