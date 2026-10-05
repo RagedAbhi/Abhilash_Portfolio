@@ -1,0 +1,23 @@
+title: JobFit
+category: Full Stack . AI
+summary: AI resume matcher that scores your fit against any job description in seconds.
+description: >-
+  Upload a resume once, match it against as many job descriptions as you like,
+  and get an AI-generated fit score with a skills gap breakdown and improvement
+  suggestions. Supports multiple named resumes per account, auto-extracts
+  structured profile data via Groq's AI, and can generate a fully tailored
+  resume for a specific job in one click. Built on Next.js 16 and Supabase with
+  Postgres Row Level Security for per-user data isolation, running entirely on
+  free-tier infrastructure.
+stack:
+  - Next.js
+  - TypeScript
+  - React
+  - Supabase
+  - Tailwind CSS
+  - PostgreSQL
+coverImage: /images/projects/job-fit/coverImage.png
+link: https://job-fit-beige.vercel.app/
+repo: https://github.com/RagedAbhi/JobFit
+featured: true
+order: 0
